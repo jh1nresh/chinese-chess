@@ -25,7 +25,7 @@
 
 - Solana：Devnet
 - Magic Router：`https://devnet-router.magicblock.app`
-- Program ID：`E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2`
+- Program ID：`4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW`
 
 Program ID 是開發用身分，deploy keypair 不會提交到 Git。這個分支含可編譯的程式、
 IDL、前端大廳與錢包接法，但在 Devnet Explorer 查到程式帳戶之前，不應宣稱已部署。

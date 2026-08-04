@@ -3,7 +3,7 @@ use ephemeral_rollups_sdk::anchor::{commit, delegate, ephemeral};
 use ephemeral_rollups_sdk::cpi::DelegateConfig;
 use ephemeral_rollups_sdk::ephem::MagicIntentBundleBuilder;
 
-declare_id!("E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2");
+declare_id!("4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW");
 
 const MATCH_SEED: &[u8] = b"xiangqi";
 const BOARD_LEN: usize = 90;

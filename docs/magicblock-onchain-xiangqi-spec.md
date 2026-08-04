@@ -3,7 +3,7 @@
 - 文件狀態：Draft v0.1
 - 目標網路：Solana Devnet
 - 適用分支：`feat/magicblock-xiangqi`
-- Program ID：`E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2`
+- Program ID：`4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW`
 - 最後更新：2026-08-03
 
 ## 1. 目標

@@ -12,7 +12,7 @@ import {
 
 describe("MagicBlock Xiangqi client", () => {
   it("uses the deployed-program address encoded in the generated IDL", () => {
-    expect(XIANGQI_PROGRAM_ID.toBase58()).toBe("E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2");
+    expect(XIANGQI_PROGRAM_ID.toBase58()).toBe("4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW");
     expect(() => new PublicKey(XIANGQI_PROGRAM_ID)).not.toThrow();
   });
 
