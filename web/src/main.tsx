@@ -1,3 +1,5 @@
+import "./lib/polyfills";
+
 import { PrivyProvider } from "@privy-io/react-auth";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 import { createRoot } from "react-dom/client";

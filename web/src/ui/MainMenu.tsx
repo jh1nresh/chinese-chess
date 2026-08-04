@@ -87,8 +87,10 @@ function MainMenuContent({
 
   const start = (): void => {
     if (!authReady) return;
-    if (!authenticated) {
-      onLogin?.();
+    // Login is only enforceable when Privy is configured; without it the
+    // local modes stay playable and only online play remains gated.
+    if (!authenticated && onLogin) {
+      onLogin();
       return;
     }
     onStart({
@@ -121,7 +123,7 @@ function MainMenuContent({
         <div className="mb-4 flex shrink-0 justify-end"><PrivyLoginButton /></div>
         {!authenticated ? (
           <p className="mb-4 text-center text-xs leading-relaxed text-[#c5b28d]" role="status">
-            {onLogin ? "請先使用 Privy 登入，登入後才能進入戰場。" : "尚未設定 Privy，暫時無法進入戰場。"}
+            {onLogin ? "請先使用 Privy 登入，登入後才能進入戰場。" : "尚未設定 Privy；單機模式可直接進入，鏈上對戰需要登入。"}
           </p>
         ) : null}
         <div className="mb-5 grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-4">
@@ -306,12 +308,12 @@ function MainMenuContent({
           type="button"
           className="mc-btn mc-btn-primary mt-5 flex w-full items-center justify-center gap-2 py-3.5 text-sm"
           onClick={start}
-          disabled={!authReady || (!authenticated && !onLogin)}
+          disabled={!authReady}
         >
           {!authReady ? (
             <><Crown size={16} /> 確認登入狀態</>
-          ) : !authenticated ? (
-            <><Crown size={16} /> {onLogin ? "先登入再進入戰場" : "登入尚未設定"}</>
+          ) : !authenticated && onLogin ? (
+            <><Crown size={16} /> 先登入再進入戰場</>
           ) : tab === "demo" ? (
             <>
               <Clapperboard size={16} /> 開始演武
