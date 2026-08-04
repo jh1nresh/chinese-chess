@@ -2,7 +2,7 @@
 
 - 文件狀態：Draft v0.1
 - 目標網路：Solana Devnet
-- 適用分支：`feat/magicblock-xiangqi`
+- 適用分支：`feat/magicblock-wager-flow`
 - Program ID：`E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2`
 - 最後更新：2026-08-03
 

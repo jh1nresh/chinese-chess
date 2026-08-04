@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "Medieval Chess",
+      "name": "龍爭象棋",
       "path": "web",
       "framework": "web"
     }

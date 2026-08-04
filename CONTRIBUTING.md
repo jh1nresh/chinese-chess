@@ -1,9 +1,8 @@
-# Contributing
+# 貢獻指南
 
-Thanks for taking an interest in King's Gambit. This document covers the workflow, the coding
-conventions and — importantly for this repository — the **commit message format**.
+感謝你協助改善龍爭象棋。請讓每次變更只處理一個明確主題，避免順手重構無關程式。
 
-## Getting set up
+## 開發環境
 
 ```bash
 cd web
@@ -11,110 +10,51 @@ bun install
 bun run dev
 ```
 
-Before opening a pull request:
+送出 Pull Request 前請執行：
 
 ```bash
 bun run lint
-bun run build     # type-checks as part of the build
+bun run build
 bun run test
 ```
 
-All three must pass. The project is strict TypeScript — no `any`, no `@ts-ignore` without a
-one-line justification.
-
-## Commit messages
-
-**All commit messages in this repository are written in English**, using
-[Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-<type>(<optional scope>): <short imperative summary>
-
-<optional body explaining the why, wrapped at 72 columns>
-```
-
-Types in use:
-
-| Type | For |
-| --- | --- |
-| `feat` | A new capability the player can see or use |
-| `fix` | A bug fix |
-| `perf` | Frame rate, load time, memory |
-| `refactor` | Internal change with no behavioural difference |
-| `style` | Visual/CSS-only or formatting changes |
-| `docs` | README and other documentation |
-| `test` | Tests only |
-| `chore` | Tooling, dependencies, housekeeping |
-
-Common scopes: `scene`, `pieces`, `board`, `audio`, `ai`, `ui`, `hud`, `assets`, `build`.
-
-Examples:
-
-```
-feat(scene): burn-away dissolve for captured figures
-fix(ui): clamp the settings panel to the viewport and add a scrollbar
-perf(pieces): freeze idle mixers on the Low preset
-docs: english README for the open-source release
-```
-
-Rules of thumb:
-
-- Imperative mood — "add", not "added" or "adds".
-- Summary line ≤ 72 characters, no trailing period.
-- One logical change per commit; keep generated-asset URL updates in their own commit.
-
-### Translating existing history
-
-Commits made before the open-source release were written in Vietnamese. If you are preparing
-a fresh public repository, run the helper script from the repository root to rewrite every
-message into English:
+若修改 `magicblock/`、IDL 或鏈上交易流程，還要執行：
 
 ```bash
-./scripts/rewrite-commit-messages.sh
+bun run test:program
 ```
 
-Read the script's warning first — it rewrites history and therefore changes every commit hash.
-Only run it on a repository you have not shared yet, or coordinate a force-push with everyone
-who has a clone.
+## Commit 格式
 
-## Coding conventions
+使用 Conventional Commits 前綴，摘要可使用中文：
 
-- **Keep the rules and the renderer apart.** Nothing in `src/core` may import three.js. The
-  scene subscribes to `GameController` events; it never reaches into chess state directly.
-- **One responsibility per scene module.** New visual systems get their own file in
-  `src/scene/` rather than growing `sceneEngine.ts`.
-- **Respect the quality presets.** Any new effect must declare what it does on Low — ideally
-  nothing at all. Check `src/scene/quality.ts` before adding per-frame work.
-- **Dispose what you create.** Geometries, materials, textures and render targets are released
-  in the owning module's `dispose()`; leaks show up fast when battlegrounds are switched.
-- **No blocking work on the main thread.** Search and other heavy computation belong in a
-  worker.
-- **Explicit types.** `useState<Thing[]>([])`, not `useState([])`. Literal style values are
-  typed with `as const`.
-- **React optimisation is manual** — this project does not use the React Compiler. Use
-  `memo`, `useMemo` and `useCallback` with honest dependency arrays.
-- **Icons** come from `lucide-react`; shared primitives from `src/components/ui`.
-- Comment the non-obvious (a shader trick, a browser quirk) and nothing else.
+```text
+feat(ui): 加入鏈上對局結算狀態
+fix(core): 修正將帥照面判定
+test(magicblock): 補上和棋退款情境
+docs: 整理專案首頁
+```
 
-## Assets
+常用前綴：`feat`、`fix`、`test`、`docs`、`refactor`、`perf`、`chore`。
 
-Models and audio are referenced by URL in `src/assets/generated.ts`. When contributing new
-assets:
+## 程式原則
 
-- Add them under `web/public/models/` or `web/public/audio/` and reference them with a
-  root-relative path.
-- Compress GLBs (`@gltf-transform/cli optimize … --compress draco --texture-compress webp`).
-- State the licence and the author of anything you did not make yourself in the pull request.
+- `web/src/core` 不得依賴 Three.js；規則與畫面保持分離。
+- 3D 資源要依品質設定降級，並在擁有它的模組中釋放。
+- 搜尋與重運算放在 Worker，不阻塞主執行緒。
+- 不使用無說明的 `any` 或 `@ts-ignore`。
+- 鏈上資料視為不可信輸入；檢查 owner、長度、discriminator 與狀態值。
+- 每筆錢包交易要求簽名前必須先模擬。
+- 不提交私鑰、部署 keypair、助記詞或含機密的環境檔案。
 
-## Pull requests
+## 素材
 
-- Branch from `main`, one topic per branch.
-- Describe what changed and, for anything visual, attach a short screen capture — this is a
-  graphics project and a clip says more than a paragraph.
-- Note the presets you tested on (at minimum Low and your own auto-detected preset).
+新增模型、圖片或音訊時，請在相同目錄留下作者、來源與授權。來源不明或沒有再散布
+權利的素材不應加入專案。
 
-## Reporting bugs
+## Pull Request
 
-Include your browser and OS, the graphics preset, the battleground, and — for rendering
-issues — the output of `chrome://gpu` or the equivalent. A FEN or the copied PGN from the
-game-over panel makes chess-logic bugs reproducible in seconds.
+- 從 `main` 建立單一主題分支。
+- 說明改了什麼、為什麼改，以及使用哪些指令驗證。
+- 視覺變更附上桌面與行動版截圖。
+- Solana 變更要列出 Program ID、目標網路與是否真的部署；本機測試不得寫成已上線。
