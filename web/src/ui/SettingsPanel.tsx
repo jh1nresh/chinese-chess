@@ -1,12 +1,15 @@
 import { X } from "lucide-react";
 
 import { ARENA_LOOKS, ARENA_ORDER, type ArenaTheme } from "../scene/arena";
+import type { PieceStyle } from "../scene/pieces";
 import type { QualityPreset } from "../scene/quality";
 
 export interface GameSettings {
   quality: QualityPreset;
   /** Which map the board is staged in. */
   arena: ArenaTheme;
+  /** 3D armies or traditional carved discs. */
+  pieceStyle: PieceStyle;
   captureCinematics: boolean;
   rotateBoard: boolean;
   /** Floating rank crests over every figure. */
@@ -69,6 +72,31 @@ export function SettingsPanel({ settings, autoDetected, gpu, fps, onChange, onCl
           ))}
         </div>
         <p className="mt-2 text-xs italic text-[#9c8b6c]">{ARENA_LOOKS[settings.arena].note}</p>
+
+        <div className="mc-rule my-5" />
+
+        <p className="mc-display mb-2 text-[0.6rem] tracking-[0.3em] text-[#a89268]">棋子樣式</p>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            className="mc-chip py-2.5"
+            data-active={settings.pieceStyle === "figures"}
+            onClick={() => onChange({ ...settings, pieceStyle: "figures" })}
+          >
+            戰場軍團
+          </button>
+          <button
+            type="button"
+            className="mc-chip py-2.5"
+            data-active={settings.pieceStyle === "traditional"}
+            onClick={() => onChange({ ...settings, pieceStyle: "traditional" })}
+          >
+            傳統棋子
+          </button>
+        </div>
+        <p className="mt-2 text-xs italic text-[#9c8b6c]">
+          {settings.pieceStyle === "traditional" ? "木刻圓棋、楷體刻字，最傳統的象棋樣貌" : "3D 軍團在戰場上廝殺，吃子有攻擊動畫"}
+        </p>
 
         <div className="mc-rule my-5" />
 

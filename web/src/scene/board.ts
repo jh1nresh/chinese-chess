@@ -352,6 +352,21 @@ export class BoardView {
     river.renderOrder = 1;
     this.group.add(river);
 
+    // 「楚河」「漢界」— the inscription that makes the river read as the river.
+    const inscriptionMaterial = this.track(
+      new THREE.MeshBasicMaterial({
+        map: this.track(riverInscriptionTexture()),
+        transparent: true,
+        depthWrite: false,
+      }),
+    );
+    const inscription = new THREE.Mesh(new THREE.PlaneGeometry(TILE * 8.9, TILE * 0.78), inscriptionMaterial);
+    this.track(inscription.geometry);
+    inscription.rotation.x = -Math.PI / 2;
+    inscription.position.set(0, BOARD_TOP + 0.008, 0);
+    inscription.renderOrder = 2;
+    this.group.add(inscription);
+
     const lineMaterial = this.track(
       new THREE.LineBasicMaterial({ color: 0x8a5a24, transparent: true, opacity: 0.9 }),
     );
@@ -899,4 +914,32 @@ export class BoardView {
     this.shrouds.clear();
     this.group.clear();
   }
+}
+
+/**
+ * The river inscription. Drawn upright for the red player (the default camera
+ * side): 楚河 on the left bank, 漢界 on the right, in the same brush face the
+ * rank crests use.
+ */
+function riverInscriptionTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 96;
+  const ctx = canvas.getContext("2d")!;
+  ctx.font = "700 62px KaiTi, STKaiti, DFKai-SB, serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "rgba(222,199,148,0.92)";
+  ctx.shadowColor = "rgba(0,0,0,0.65)";
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetY = 2;
+  const spread = 46;
+  ctx.fillText("楚", 256 - spread, 52);
+  ctx.fillText("河", 256 + spread, 52);
+  ctx.fillText("漢", 768 - spread, 52);
+  ctx.fillText("界", 768 + spread, 52);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  return texture;
 }

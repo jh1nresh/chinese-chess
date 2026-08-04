@@ -8,6 +8,7 @@ import { indexToSquare, MATCH_STATUS, type MatchAccount } from "../magicblock/ma
 import { OnlineMatchBar } from "../magicblock/OnlineMatchBar";
 import type { OnlineSession } from "../magicblock/onlineTypes";
 import { ARENA_LOOKS, DEFAULT_ARENA, type ArenaTheme } from "../scene/arena";
+import type { PieceStyle } from "../scene/pieces";
 import { detectQualityPreset, type QualityPreset } from "../scene/quality";
 import { SceneEngine, type CameraPreset, type ShowcaseCamera } from "../scene/sceneEngine";
 import { GameOverModal } from "./GameOverModal";
@@ -25,6 +26,7 @@ const RENDER_PREFS_KEY = "kg.render";
 interface RenderPrefs {
   safeMode: boolean;
   brightness: number;
+  pieceStyle: PieceStyle;
 }
 
 /**
@@ -33,7 +35,7 @@ interface RenderPrefs {
  * find the toggle again on every reload.
  */
 function loadRenderPrefs(): RenderPrefs {
-  const fallback: RenderPrefs = { safeMode: false, brightness: 1 };
+  const fallback: RenderPrefs = { safeMode: false, brightness: 1, pieceStyle: "figures" };
   if (typeof window === "undefined") return fallback;
   try {
     const forced = new URLSearchParams(window.location.search).has("safe");
@@ -42,6 +44,7 @@ function loadRenderPrefs(): RenderPrefs {
     return {
       safeMode: forced || stored.safeMode === true,
       brightness: typeof stored.brightness === "number" ? Math.min(1.8, Math.max(0.6, stored.brightness)) : 1,
+      pieceStyle: stored.pieceStyle === "traditional" ? "traditional" : "figures",
     };
   } catch {
     return fallback;
@@ -75,6 +78,7 @@ export function GameShell() {
     muted: false,
     safeMode: initialRender.safeMode,
     brightness: initialRender.brightness,
+    pieceStyle: initialRender.pieceStyle,
   }));
   const [gpu, setGpu] = useState<string>("");
 
@@ -152,6 +156,7 @@ export function GameShell() {
     engine.setInteractive(false);
     engine.setSafeMode(initialRender.safeMode);
     engine.setBrightness(initialRender.brightness);
+    engine.primePieceStyle(initialRender.pieceStyle);
     setGpu(engine.getGpuSummary());
     engine.start();
 
@@ -193,8 +198,13 @@ export function GameShell() {
     engine.setRankBadges(settings.rankBadges);
     engine.setSafeMode(settings.safeMode);
     engine.setBrightness(settings.brightness);
+    void engine.setPieceStyle(settings.pieceStyle);
     audio.setMuted(settings.muted);
-    saveRenderPrefs({ safeMode: settings.safeMode, brightness: settings.brightness });
+    saveRenderPrefs({
+      safeMode: settings.safeMode,
+      brightness: settings.brightness,
+      pieceStyle: settings.pieceStyle,
+    });
   }, [settings]);
 
   // ------------------------------------------------------------- attract mode
