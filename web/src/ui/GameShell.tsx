@@ -564,9 +564,17 @@ export function GameShell() {
               "逾時結果已確認。",
             )}
             onSettle={() => void runOnlineAction(
-              "回寫棋局並模擬獎池結算…",
+              "第 1/2 筆：回寫棋局並解除 MagicBlock 委派…",
               async () => {
-                await onlineSession.client.settleAndClaim(onlineSession.game, onlineAccount.red, onlineAccount.black);
+                await onlineSession.client.settleAndClaim(
+                  onlineSession.game,
+                  onlineAccount.red,
+                  onlineAccount.black,
+                  (stage) => {
+                    if (stage === "waiting-for-base-layer") setOnlineMessage("第 1/2 筆已確認，等待狀態回到 Solana Devnet…");
+                    if (stage === "payout") setOnlineMessage("第 2/2 筆：模擬獎池付款，請再次確認錢包…");
+                  },
+                );
                 setOnlineAccount(await onlineSession.client.fetchMatch(onlineSession.game));
               },
               "獎池已在 Solana Devnet 結算。",

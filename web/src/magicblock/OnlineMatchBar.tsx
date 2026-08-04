@@ -50,7 +50,7 @@ export function OnlineMatchBar({
       <div className="mt-3 grid grid-cols-2 gap-2">
         {terminal ? (
           <button type="button" className="mc-btn mc-btn-primary col-span-2" disabled={busy || account.settled} onClick={onSettle}>
-            <Flag size={14} /> {account.settled ? "獎池已結算" : "回寫並結算獎池"}
+            <Flag size={14} /> {account.settled ? "獎池已結算" : "回寫並結算（2 次確認）"}
           </button>
         ) : opponentOfferedDraw ? (
           <button type="button" className="mc-btn mc-btn-primary" disabled={busy} onClick={onAcceptDraw}>

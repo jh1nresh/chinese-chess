@@ -4,6 +4,7 @@ import {
   Connection,
   PublicKey,
   SystemProgram,
+  type AccountInfo,
   type Commitment,
   type Transaction,
   type VersionedTransaction,
@@ -75,6 +76,8 @@ export interface MagicBlockClientOptions {
   baseLayerUrl?: string;
   onSimulation?: (logs: string[]) => void;
 }
+
+export type SettlementStage = "commit" | "waiting-for-base-layer" | "payout";
 
 export class MagicBlockMatchClient {
   readonly connection: ConnectionMagicRouter;
@@ -210,9 +213,17 @@ export class MagicBlockMatchClient {
     return this.send(transaction);
   }
 
-  async settleAndClaim(game: PublicKey, red: PublicKey, black: PublicKey): Promise<string> {
+  async settleAndClaim(
+    game: PublicKey,
+    red: PublicKey,
+    black: PublicKey,
+    onStage?: (stage: SettlementStage) => void,
+  ): Promise<string> {
+    onStage?.("commit");
     await this.settle(game);
+    onStage?.("waiting-for-base-layer");
     await this.waitForUndelegated(game);
+    onStage?.("payout");
     return this.claimPayout(game, red, black);
   }
 
@@ -233,13 +244,21 @@ export class MagicBlockMatchClient {
   }
 
   async fetchMatch(game: PublicKey): Promise<MatchAccount> {
-    return (await this.program.account.xiangqiMatch.fetch(game)) as MatchAccount;
+    const account = await this.connection.getAccountInfo(game, COMMITMENT);
+    if (!account) throw new Error("找不到這個鏈上對局。");
+    return this.decodeMatchAccount(account);
   }
 
   onMatchChange(game: PublicKey, listener: (match: MatchAccount) => void): number {
     return this.connection.onAccountChange(
       game,
-      (account) => listener(this.program.coder.accounts.decode("XiangqiMatch", account.data) as MatchAccount),
+      (account) => {
+        try {
+          listener(this.decodeMatchAccount(account));
+        } catch {
+          console.warn("[magicblock] ignored an invalid match account update");
+        }
+      },
       COMMITMENT,
     );
   }
@@ -260,6 +279,17 @@ export class MagicBlockMatchClient {
     const signature = await this.connection.sendRawTransaction(signed.serialize(), { skipPreflight: false });
     await this.connection.confirmTransaction(signature, COMMITMENT);
     return signature;
+  }
+
+  private decodeMatchAccount(account: AccountInfo<Buffer>): MatchAccount {
+    if (!account.owner.equals(XIANGQI_PROGRAM_ID)) throw new Error("對局帳戶不屬於象棋程式。");
+    const expectedSize = this.program.coder.accounts.size("XiangqiMatch");
+    if (account.data.length !== expectedSize) throw new Error("對局帳戶長度不正確。");
+    const decoded = this.program.coder.accounts.decode("XiangqiMatch", account.data) as MatchAccount;
+    if (decoded.board.length !== 90 || ![0x10, 0x20].includes(decoded.turn) || decoded.status > MATCH_STATUS.cancelled) {
+      throw new Error("對局帳戶內容不正確。");
+    }
+    return decoded;
   }
 
   private async waitForUndelegated(game: PublicKey): Promise<void> {

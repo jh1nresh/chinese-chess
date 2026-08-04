@@ -244,7 +244,6 @@ pub mod xiangqi_match {
         let player = ctx.accounts.player.key();
         let side = game.side_for(player)?;
         game.draw_offer = side;
-        game.last_action_at = Clock::get()?.unix_timestamp;
         emit!(DrawOffered {
             game: game.key(),
             player
