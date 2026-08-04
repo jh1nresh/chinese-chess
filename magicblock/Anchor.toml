@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "0.32.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+xiangqi_match = "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2"
+
+[programs.devnet]
+xiangqi_match = "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[workspace]
+members = ["programs/xiangqi_match"]

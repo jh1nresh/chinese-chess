@@ -1,0 +1,1354 @@
+{
+  "address": "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2",
+  "metadata": {
+    "name": "xiangqi_match",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "MagicBlock Ephemeral Rollup match state for 3D Xiangqi"
+  },
+  "instructions": [
+    {
+      "name": "accept_draw",
+      "discriminator": [
+        5,
+        12,
+        23,
+        213,
+        201,
+        27,
+        117,
+        193
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_waiting_match",
+      "discriminator": [
+        163,
+        84,
+        224,
+        160,
+        9,
+        211,
+        90,
+        221
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "red",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "game"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_payout",
+      "discriminator": [
+        127,
+        240,
+        132,
+        62,
+        227,
+        198,
+        146,
+        133
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "red",
+          "writable": true
+        },
+        {
+          "name": "black",
+          "writable": true
+        },
+        {
+          "name": "payer",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_timeout",
+      "discriminator": [
+        130,
+        234,
+        45,
+        53,
+        120,
+        90,
+        86,
+        178
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_victory",
+      "discriminator": [
+        119,
+        177,
+        84,
+        236,
+        128,
+        134,
+        183,
+        199
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "commit_and_undelegate",
+      "discriminator": [
+        9,
+        108,
+        132,
+        87,
+        184,
+        76,
+        98,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "commit_match",
+      "discriminator": [
+        175,
+        146,
+        74,
+        234,
+        39,
+        25,
+        248,
+        114
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "magic_program",
+          "address": "Magic11111111111111111111111111111111111111"
+        },
+        {
+          "name": "magic_context",
+          "writable": true,
+          "address": "MagicContext1111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "delegate_match",
+      "discriminator": [
+        30,
+        116,
+        9,
+        69,
+        147,
+        61,
+        133,
+        238
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "buffer_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                3,
+                92,
+                60,
+                238,
+                198,
+                95,
+                36,
+                44,
+                214,
+                155,
+                228,
+                35,
+                184,
+                39,
+                97,
+                172,
+                250,
+                46,
+                165,
+                225,
+                118,
+                188,
+                205,
+                162,
+                12,
+                37,
+                221,
+                128,
+                103,
+                33,
+                75,
+                135
+              ]
+            }
+          }
+        },
+        {
+          "name": "delegation_record_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "delegation_metadata_pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pda"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "delegation_program"
+            }
+          }
+        },
+        {
+          "name": "pda",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "payer"
+              },
+              {
+                "kind": "arg",
+                "path": "match_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "owner_program",
+          "address": "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2"
+        },
+        {
+          "name": "delegation_program",
+          "address": "DELeGGvXpWV2fqJUhqcF5ZSYMS4JTLjteaAMARRSaeSh"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "match_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_match",
+      "discriminator": [
+        156,
+        133,
+        52,
+        179,
+        176,
+        29,
+        64,
+        124
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "red"
+              },
+              {
+                "kind": "arg",
+                "path": "match_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "red",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "match_id",
+          "type": "u64"
+        },
+        {
+          "name": "stake_lamports",
+          "type": "u64"
+        },
+        {
+          "name": "join_deadline",
+          "type": "i64"
+        },
+        {
+          "name": "turn_timeout_seconds",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "join_match",
+      "discriminator": [
+        244,
+        8,
+        47,
+        130,
+        192,
+        59,
+        179,
+        44
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "black",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "offer_draw",
+      "discriminator": [
+        87,
+        16,
+        73,
+        235,
+        76,
+        137,
+        216,
+        229
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "play_move",
+      "discriminator": [
+        238,
+        70,
+        57,
+        142,
+        51,
+        180,
+        219,
+        31
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "from",
+          "type": "u8"
+        },
+        {
+          "name": "to",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "process_undelegation",
+      "discriminator": [
+        196,
+        28,
+        41,
+        206,
+        48,
+        37,
+        51,
+        167
+      ],
+      "accounts": [
+        {
+          "name": "base_account",
+          "writable": true
+        },
+        {
+          "name": "buffer",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  110,
+                  100,
+                  101,
+                  108,
+                  101,
+                  103,
+                  97,
+                  116,
+                  101,
+                  45,
+                  98,
+                  117,
+                  102,
+                  102,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "base_account"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                181,
+                183,
+                0,
+                225,
+                242,
+                87,
+                58,
+                192,
+                204,
+                6,
+                34,
+                1,
+                52,
+                74,
+                207,
+                151,
+                184,
+                53,
+                6,
+                235,
+                140,
+                229,
+                25,
+                152,
+                204,
+                98,
+                126,
+                24,
+                147,
+                128,
+                167,
+                62
+              ]
+            }
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "account_seeds",
+          "type": {
+            "vec": "bytes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "resign",
+      "discriminator": [
+        177,
+        177,
+        153,
+        96,
+        88,
+        149,
+        206,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  120,
+                  105,
+                  97,
+                  110,
+                  103,
+                  113,
+                  105
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.red",
+                "account": "XiangqiMatch"
+              },
+              {
+                "kind": "account",
+                "path": "game.match_id",
+                "account": "XiangqiMatch"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player",
+          "signer": true
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "XiangqiMatch",
+      "discriminator": [
+        163,
+        228,
+        180,
+        213,
+        149,
+        223,
+        143,
+        150
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "DrawOffered",
+      "discriminator": [
+        191,
+        249,
+        70,
+        90,
+        30,
+        226,
+        137,
+        126
+      ]
+    },
+    {
+      "name": "MatchCancelled",
+      "discriminator": [
+        99,
+        86,
+        22,
+        122,
+        82,
+        247,
+        60,
+        113
+      ]
+    },
+    {
+      "name": "MatchFinished",
+      "discriminator": [
+        64,
+        23,
+        27,
+        37,
+        145,
+        154,
+        100,
+        255
+      ]
+    },
+    {
+      "name": "MatchSettled",
+      "discriminator": [
+        243,
+        201,
+        134,
+        151,
+        193,
+        131,
+        223,
+        150
+      ]
+    },
+    {
+      "name": "MovePlayed",
+      "discriminator": [
+        61,
+        60,
+        170,
+        174,
+        207,
+        166,
+        163,
+        146
+      ]
+    },
+    {
+      "name": "StakeDeposited",
+      "discriminator": [
+        69,
+        152,
+        144,
+        109,
+        232,
+        34,
+        225,
+        19
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "MatchAlreadyStarted",
+      "msg": "The match has already started"
+    },
+    {
+      "code": 6001,
+      "name": "SamePlayer",
+      "msg": "Red and Black must use different wallets"
+    },
+    {
+      "code": 6002,
+      "name": "MatchNotActive",
+      "msg": "The match is not active"
+    },
+    {
+      "code": 6003,
+      "name": "WrongPlayer",
+      "msg": "This wallet cannot move for the current side"
+    },
+    {
+      "code": 6004,
+      "name": "IllegalMove",
+      "msg": "The move violates Xiangqi rules or leaves the general in check"
+    },
+    {
+      "code": 6005,
+      "name": "MoveOverflow",
+      "msg": "The move counter overflowed"
+    },
+    {
+      "code": 6006,
+      "name": "MatchHasLegalMoves",
+      "msg": "The defending side still has a legal move"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidStake",
+      "msg": "The stake must be greater than zero"
+    },
+    {
+      "code": 6008,
+      "name": "StakeTooLarge",
+      "msg": "The stake exceeds the program safety cap"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidJoinDeadline",
+      "msg": "The join deadline must be within the next 24 hours"
+    },
+    {
+      "code": 6010,
+      "name": "JoinDeadlinePassed",
+      "msg": "The join deadline has passed"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidTurnTimeout",
+      "msg": "The turn timeout must be between 60 seconds and 24 hours"
+    },
+    {
+      "code": 6012,
+      "name": "NoDrawOffer",
+      "msg": "No draw offer is active"
+    },
+    {
+      "code": 6013,
+      "name": "CannotAcceptOwnDraw",
+      "msg": "A player cannot accept their own draw offer"
+    },
+    {
+      "code": 6014,
+      "name": "TurnNotTimedOut",
+      "msg": "The active turn has not timed out"
+    },
+    {
+      "code": 6015,
+      "name": "AlreadySettled",
+      "msg": "This match has already paid out"
+    },
+    {
+      "code": 6016,
+      "name": "MatchNotFinished",
+      "msg": "The match is not ready for payout"
+    },
+    {
+      "code": 6017,
+      "name": "PayoutOverflow",
+      "msg": "The payout amount overflowed"
+    },
+    {
+      "code": 6018,
+      "name": "EscrowUnderfunded",
+      "msg": "The escrow account does not have enough spendable lamports"
+    }
+  ],
+  "types": [
+    {
+      "name": "DrawOffered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game",
+            "type": "pubkey"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MatchCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game",
+            "type": "pubkey"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "refund",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MatchFinished",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game",
+            "type": "pubkey"
+          },
+          {
+            "name": "winner",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MatchSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "red",
+            "type": "pubkey"
+          },
+          {
+            "name": "black",
+            "type": "pubkey"
+          },
+          {
+            "name": "pot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MovePlayed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game",
+            "type": "pubkey"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "ply",
+            "type": "u16"
+          },
+          {
+            "name": "from",
+            "type": "u8"
+          },
+          {
+            "name": "to",
+            "type": "u8"
+          },
+          {
+            "name": "captured",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakeDeposited",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game",
+            "type": "pubkey"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_pot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "XiangqiMatch",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "match_id",
+            "type": "u64"
+          },
+          {
+            "name": "red",
+            "type": "pubkey"
+          },
+          {
+            "name": "black",
+            "type": "pubkey"
+          },
+          {
+            "name": "board",
+            "type": {
+              "array": [
+                "u8",
+                90
+              ]
+            }
+          },
+          {
+            "name": "turn",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "ply",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "stake_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "join_deadline",
+            "type": "i64"
+          },
+          {
+            "name": "last_action_at",
+            "type": "i64"
+          },
+          {
+            "name": "turn_timeout_seconds",
+            "type": "i64"
+          },
+          {
+            "name": "draw_offer",
+            "type": "u8"
+          },
+          {
+            "name": "settled",
+            "type": "bool"
+          },
+          {
+            "name": "last_from",
+            "type": "u8"
+          },
+          {
+            "name": "last_to",
+            "type": "u8"
+          },
+          {
+            "name": "last_player",
+            "type": "pubkey"
+          },
+          {
+            "name": "end_reason",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

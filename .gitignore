@@ -1,0 +1,8 @@
+node_modules
+node_modules.dataless
+.env
+.expo
+.rork
+.gstack/
+magicblock/.anchor/
+magicblock/target/
