@@ -44,15 +44,15 @@ const COLOURS: Record<Faction, Colourway> = {
     tassel: 0xa01f16,
     wood: 0x5a3d24,
   },
-  // 漢
+  // 漢 — deep indigo, the blue ink of the classic piece sets, against 楚 red.
   b: {
-    robe: 0x191b21,
+    robe: 0x14223f,
     robeTrim: 0x6e5c33,
-    armour: 0x272930,
+    armour: 0x1f2c45,
     skin: 0xa87e56,
-    cloth: 0x22242b,
+    cloth: 0x18294c,
     metal: 0x53535c,
-    tassel: 0x8f7432,
+    tassel: 0x2c478a,
     wood: 0x453222,
   },
 };
