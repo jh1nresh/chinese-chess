@@ -44,7 +44,8 @@ function loadRenderPrefs(): RenderPrefs {
     return {
       safeMode: forced || stored.safeMode === true,
       brightness: typeof stored.brightness === "number" ? Math.min(1.8, Math.max(0.6, stored.brightness)) : 1,
-      pieceStyle: stored.pieceStyle === "traditional" ? "traditional" : "figures",
+      pieceStyle:
+        stored.pieceStyle === "traditional" || stored.pieceStyle === "chinese" ? stored.pieceStyle : "figures",
     };
   } catch {
     return fallback;

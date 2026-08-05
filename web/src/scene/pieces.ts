@@ -9,6 +9,7 @@ import {
   type PieceAnimationSet,
 } from "../assets/generated";
 import type { Faction, PieceKind } from "../core/types";
+import { buildChineseFigure } from "./chineseFigures";
 import {
   BADGE_LIFT,
   BADGE_SCALE,
@@ -1285,6 +1286,18 @@ export class PieceFactory {
     await this.load();
   }
 
+  private loadChinese(): void {
+    const kinds = Object.keys(PIECE_MODEL_URLS.w) as PieceKind[];
+    for (const faction of ["w", "b"] as Faction[]) {
+      for (const kind of kinds) {
+        this.templates.set(
+          `${faction}${kind}`,
+          this.normalize(buildChineseFigure(kind, faction), kind, {}, true),
+        );
+      }
+    }
+  }
+
   private loadTraditional(): void {
     const kinds = Object.keys(PIECE_MODEL_URLS.w) as PieceKind[];
     for (const faction of ["w", "b"] as Faction[]) {
@@ -1313,8 +1326,9 @@ export class PieceFactory {
   }
 
   async load(onProgress?: (loaded: number, total: number) => void): Promise<void> {
-    if (this.style === "traditional") {
-      this.loadTraditional();
+    if (this.style === "traditional" || this.style === "chinese") {
+      if (this.style === "traditional") this.loadTraditional();
+      else this.loadChinese();
       onProgress?.(1, 1);
       this.loaded = true;
       return;
@@ -1561,8 +1575,8 @@ export class PieceFactory {
  * Primitive-built humanoid used only if a generated sculpt fails to download —
  * head, torso, arms and a kind-specific silhouette so the game stays playable.
  */
-/** Which sculpt roster the board fields: 3D armies or traditional carved discs. */
-export type PieceStyle = "figures" | "traditional";
+/** Which sculpt roster the board fields: western armies, Chinese armies or discs. */
+export type PieceStyle = "figures" | "chinese" | "traditional";
 
 const traditionalFaceCache = new Map<string, THREE.CanvasTexture>();
 
