@@ -1,518 +1,294 @@
-# 赤壁象棋 — 3D Chinese Chess
+# 赤壁象棋 — 3D 楚漢戰場象棋
 
-A cinematic 3D Chinese chess game in the browser. Red and Black armies face each other as
-sculpted, rigged soldiers in a Chinese mountain-temple command court, marching and striking
-across a 9×10 marble-and-basalt Xiangqi board.
+在瀏覽器裡開打的電影感 3D 中國象棋。紅方漢軍(劉邦)與藍方楚軍(項羽)在山寺大殿裡
+隔著楚河漢界對峙 —— 一整面木刻棋盤、墨線縱橫、帥旗獵獵。
 
-Built with **Vite + React 19 + TypeScript + three.js**, a native TypeScript Xiangqi rules
-engine, and a **Web Worker** search engine for the computer opponent. This MagicBlock branch
-adds Privy authentication, Solana wallets and wagered Devnet player-versus-player matches.
+線上試玩:**https://chinese-chess-two.vercel.app**
+
+技術棧:**Vite + React 19 + TypeScript + three.js**,自寫的 TypeScript 象棋規則引擎,
+AI 對手跑在 **Web Worker** 裡不卡渲染。另附 MagicBlock/Solana 鏈上押注對戰的完整程式
+(Anchor program + 前端接線,Devnet 尚未部署)。
 
 ```bash
-cd web && bun install && bun run dev
+cd web && npm install && npm run dev   # http://localhost:8080
 ```
 
 ---
 
-## Table of contents
+## 目錄
 
-- [Features](#features)
-- [Quick start](#quick-start)
-- [Controls](#controls)
-- [Interface](#interface)
-- [Game modes](#game-modes)
-- [Battlegrounds](#battlegrounds)
-- [Project structure](#project-structure)
-- [Architecture](#architecture)
-- [The computer opponent](#the-computer-opponent)
-- [Graphics presets](#graphics-presets)
-- [Character animation](#character-animation)
-- [Swapping in your own models](#swapping-in-your-own-models)
-- [Audio](#audio)
-- [Scripts](#scripts)
-- [Browser support](#browser-support)
-- [Contributing](#contributing)
-- [License](#license)
+- [特色](#特色)
+- [快速開始](#快速開始)
+- [操作方式](#操作方式)
+- [遊戲模式](#遊戲模式)
+- [棋子樣式](#棋子樣式)
+- [戰場場景](#戰場場景)
+- [專案結構](#專案結構)
+- [架構](#架構)
+- [電腦對手](#電腦對手)
+- [畫質預設](#畫質預設)
+- [黑畫面救援](#黑畫面救援)
+- [音效](#音效)
+- [鏈上對戰MagicBlock](#鏈上對戰magicblock)
+- [指令](#指令)
+- [瀏覽器支援](#瀏覽器支援)
+- [貢獻](#貢獻)
+- [授權](#授權)
 
 ---
 
-## Features
+## 特色
 
-- **Xiangqi rules** — palace-bound generals and advisors, elephant eyes and river limits,
-  blocked horse legs, cannon screens, soldiers crossing the river, flying generals, check,
-  checkmate, stalemate-as-loss and threefold repetition.
-- **Rigged 3D characters, not chess pieces** — twelve sculpts (six per army), each with
-  `idle`, `walk`, `attack` and `death` skeletal clips, plus weapons, shields and a floating
-  rank crest.
-- **Figures march, they do not slide** — a moved piece turns to face its destination, walks
-  the distance on its own legs at the cadence of its rank, and squares up again on arrival.
-  Knights keep the leap, running through the air and landing on both feet.
-- **Synthesised footsteps on the stride clock** — every footfall is fired by the same clock
-  that retimes the walk cycle, so sound, grit puff and foot all land together: scuffs for
-  footsoldiers, leather for the clergy, plate for the tower guardians, a slow deliberate
-  tread for the crown.
-- **Cinematic captures** — the camera punches in, the attacker strikes on the hit frame,
-  sparks fly, the screen shakes, and the defender **burns away from the soles upward**
-  through a ragged edge of light, shedding motes that drift off (cold soul-light for the
-  Kingdom, live embers for the Empire).
-- **A blow that scales with rank** — the footsoldier stabs and moves on; the rider cuts on the
-  charge and leaves an arc of steel hanging in the air; the tower guardian's hammer sends a
-  wave rolling across the stone and the hall keeps shaking afterwards; the crown drops a
-  **column of light on the condemned**, rings a bell over it, and executes it in gold. Each
-  rank has its own lens punch, hitstop, swing weight and aftershock.
-- **Casters kill at range** — the queen and the mage never close the distance. They level the
-  staff from their own square, gather fire at the crystal, and throw it down the line: it
-  lights the hall as it flies, breaks open on the body, and only once the corpse has burned
-  away do they walk the whole distance and take the square. The mage throws **one** bolt; the
-  sorceress throws a **volley of three** and leaves a ring of fire burning on the square (cold
-  witchfire for the Kingdom, sunfire for the Empire).
-- **Twelve death cries** — one recorded voice per rank per army, panned to where the body is
-  on screen, ducking the music for a beat and pitch-jittered so no two deaths sound alike.
-- **Four battlegrounds** that relight the whole world — sky, haze, stone colour, tile
-  contrast, fires, birds, siege engines and the film grade.
-- **2D tactical view** — one key lifts the camera straight overhead and flattens every figure
-  into a stamped counter, so nothing can hide a square. Selection and moving keep working.
-- **Three engine strengths** running off the main thread, so the render loop never blocks.
-- **Showcase / attract mode** — let two engines duel on their own with pace control, pause,
-  auto-rematch, and a clean capture view with the entire interface hidden. Three camera
-  behaviours: hold one angle, follow the figure on the move and close in on the fight, or
-  drift slowly around the board. The showcase also renders crisper than a played game —
-  no depth of field, softer grain, vignette and bloom.
-- **An interface that stays off the board** — icon-only controls with a themed tooltip on every
-  one of them (name, one-line explanation, key cap), the move record folded into a corner
-  sigil, and a slim showcase rail that collapses to a single icon. One key strips the whole
-  overlay for recording.
-- **Auto-detected graphics presets** (Low → Ultra) with an automatic step-down if the
-  measured frame rate stays low, plus WebGL context-loss recovery.
-- **Xiangqi clocks**, undo, resign, flip board, copyable Chinese move record, captured tray
-  with material score.
+- **完整象棋規則** — 九宮將帥士、象眼與過河限制、蹩馬腿、炮打隔子、兵過河橫走、
+  白臉將、將軍、絕殺、困斃判負與三次重複。
+- **楚漢相爭軍陣** — 程序化生成的 3D 軍團:紅方漢軍劉邦(長冠佩劍)、藍方楚軍項羽
+  (鶡冠雙羽持戟),兵卒髮髻幘巾、札甲圓盾,戰車軍旗、投石車,主帥各插「漢」「楚」
+  字大纛。全部離線即時生成,不依賴外部模型。
+- **傳統棋子模式** — 一鍵切回木刻圓棋:楷體刻字、紅朱藍墨,雙方刻字各對自己正立。
+- **中式棋盤** — 單一木板棋面配傳統線圖:直線過河中斷、九宮斜線、炮兵位準星記號、
+  楚河漢界楷書題字。
+- **電影感吃子** — 鏡頭推進、火花、震屏,被吃的棋子從腳底燒蝕成飛灰;將軍時被將的
+  主帥發出紅光警示。
+- **2D 戰術視角** — 一鍵拉到正上方俯瞰,棋子攤平成印章棋標,盤面一目了然。
+- **自動演武** — 兩個引擎自動對弈:各自難度、0.5×–4× 倍速、自動再戰、跟拍/環繞
+  鏡頭,介面可全部收起來錄影。閒置主選單 30 秒會自動開演。
+- **不擋棋盤的介面** — 純圖示控制列,每顆按鈕都有主題化 tooltip(名稱、一句說明、
+  快捷鍵),棋譜收在角落印記裡,`C` 鍵一鍵全隱藏。
+- **自動偵測畫質**(低 → 極高),偵測到掉幀自動降檔,WebGL context 遺失可復原。
+- **對局時鐘**(沙漏呈現)、悔棋、認輸、翻轉棋盤、可複製的中文棋譜、被吃棋子清單
+  與子力比較。
 
-## Quick start
+## 快速開始
 
-Requires **Node 20+**. [Bun](https://bun.sh) is recommended; npm/pnpm work too.
+需要 **Node 20+**。npm / pnpm / bun 都可以(repo 內附 `package-lock.json`)。
 
 ```bash
 git clone <your-fork-url>
 cd <repo>/web
 
-bun install
-bun run dev        # http://localhost:8080
-bun run build      # production bundle in web/dist/
-bun run preview    # serve the built bundle
+npm install
+npm run dev        # http://localhost:8080
+npm run build      # production bundle 輸出到 web/dist/
+npm run preview    # 本機預覽 build 結果
 ```
 
-The build output in `web/dist/` is a plain static site — drop it on GitHub Pages, Netlify,
-Cloudflare Pages or any static host. Copy `web/.env.example` to `web/.env.local` and provide a
-Privy app ID. Login is required before any game mode opens; the public app ID is safe to expose
-to the browser and login methods remain controlled by the Privy dashboard.
+`web/dist/` 是純靜態網站 — 丟上 Vercel、GitHub Pages、Netlify、Cloudflare Pages 都行。
 
-The `feat/magicblock-xiangqi` branch also includes a deployable Anchor match program and a
-Magic Router browser adapter. See [`magicblock/README.md`](magicblock/README.md) for the
-delegate → real-time moves → commit-and-undelegate flow.
+**登入是選配的**:不設定任何環境變數就是乾淨的單機版(人機/雙人/演武),完全不需要
+登入。想開鏈上對戰才需要把 `web/.env.example` 複製成 `web/.env.local` 並填入 Privy
+app ID — 此時選單會多出「鏈上對戰」分頁與登入按鈕。
 
-## Controls
+## 操作方式
 
-| Action | Input |
+| 動作 | 輸入 |
 | --- | --- |
-| Orbit / zoom | Drag, mouse wheel (one-finger drag and pinch on touch) |
-| Select a figure | Click it — legal squares glow green, captures red |
-| Move | Click a highlighted square (click the figure again to deselect) |
-| Camera & battleground | Camera icon in the top bar — Ivory / Obsidian / Overhead / Cinematic, flip, tactical, and the four arenas |
-| What a button does | Hover or focus it (tap it on touch) — every icon carries a tooltip |
-| Skip the intro | Click anywhere during the opening sweep |
-| Settings | Gear icon — battleground, graphics preset, capture cinematics, board swing, sound |
+| 旋轉 / 縮放鏡頭 | 拖曳、滾輪(觸控:單指拖曳、雙指縮放) |
+| 選取棋子 | 點擊 — 合法落點亮綠、可吃的亮紅 |
+| 走棋 | 點高亮的格子(再點一次棋子取消選取) |
+| 鏡頭與場景 | 頂欄相機圖示 — 紅方 / 藍方 / 俯瞰 / 電影視角、翻轉、戰術視角、四個場景 |
+| 看按鈕功能 | 滑過或聚焦(觸控:輕點)— 每顆圖示都有 tooltip |
+| 跳過開場 | 開場運鏡中點擊任意處 |
+| 遊戲設定 | 齒輪圖示 — 場景、棋子樣式、畫質、吃子運鏡、音效 |
 
-There is no drag-and-drop: a press that travels more than 8px is read as a camera swing, so
-orbiting from a figure never moves it. Selection and moves both resolve on release.
+沒有拖放走棋:按住移動超過 8px 視為轉鏡頭,所以從棋子上開始轉視角不會誤走。
+選取與落子都在放開時判定。
 
-Keyboard shortcuts (ignored while typing in a field):
+鍵盤快捷鍵(輸入框聚焦時停用):
 
-| Key | Action |
+| 鍵 | 動作 |
 | --- | --- |
-| `F` | Flip the camera to the other side |
-| `T` | Toggle the 2D tactical view |
-| `H` | Open / fold the chronicle (move record and spoils) |
-| `C` | Toggle cinema mode (hide the entire interface) |
-| `Space` | Pause / resume playback in showcase mode |
-| `Esc` | Close the settings panel, camera menu, chronicle or an open tooltip |
+| `F` | 鏡頭翻到對面 |
+| `T` | 切換 2D 戰術視角 |
+| `H` | 展開 / 收合棋譜 |
+| `C` | 電影模式(隱藏整個介面) |
+| `Space` | 演武模式暫停 / 繼續 |
+| `Esc` | 關閉設定、相機選單、棋譜或 tooltip |
 
-## Interface
+## 遊戲模式
 
-The board owns the screen; every panel is either short, in a corner, or foldable.
-
-| Region | What lives there |
+| 模式 | 說明 |
 | --- | --- |
-| Top left | Whose turn it is, the thinking pulse, the check banner, the showcase duel counter |
-| Top right | Clocks, then the icon rail — take back, resign, new duel, sound, fullscreen, flip, tactical, camera menu, settings |
-| Right, under the bar | Spoils: both captured trays and the material score (desktop only; it folds into the chronicle on narrow screens) |
-| Bottom left | The chronicle sigil — a corner button with a move counter that unfurls the record on demand (`H`) |
-| Bottom right | The showcase rail, only during a showcase duel |
+| **人機對戰** | 選陣營、AI 強度與時限 |
+| **雙人對戰** | 同螢幕輪流;換手時鏡頭自動轉到該方(可關) |
+| **鏈上對戰** | 兩個 Privy Solana 錢包各押 0.01 devSOL 開房對戰(需設定 Privy,見下方 MagicBlock 章節) |
+| **自動演武** | 引擎互毆 — 各自難度、倍速、自動再戰、三種鏡頭 |
+| **待機演武** | 主選單放著不動 30 秒,背景自動開打 |
 
-- **Tooltips** (`src/ui/Tooltip.tsx`) replace the browser's native `title`, which appears too
-  late to explain an icon. Each bubble carries the control's name, one sentence of
-  explanation and a key cap when there is a shortcut. It opens after 110 ms, then **instantly**
-  for the rest of a sweep along the rail, picks the screen edge that keeps it in view, flashes
-  for 1.8 s on a touch press (touch has no hover), and closes on Escape, blur or scroll. The
-  bubble is rendered inside its anchor rather than through a body portal, so it survives
-  fullscreen.
-- **The showcase rail** is a single 26px row of icons — play/pause, 0.5×–4× pace, the three
-  camera behaviours, loop, restart — held at 74% opacity until hovered, and foldable down to
-  one clapperboard icon. Pause is shown by a breathing play button instead of a large label.
-- **Cinema mode** (`C`) removes the overlay completely and leaves one small restore button, so
-  a screen capture is board-only.
+時限:不限時、5、10、15 分鐘。
 
-## Game modes
+## 棋子樣式
 
-| Mode | What it is |
+遊戲設定 → 棋子樣式:
+
+| 樣式 | 說明 |
 | --- | --- |
-| **Player vs Computer** | Pick your colour, an engine strength and an optional clock |
-| **Two players** | Hotseat on one screen; the camera swings round between turns (switchable) |
-| **Onchain duel** | Two Privy Solana wallets create or join a shared MagicBlock Devnet room, each staking 0.01 devSOL |
-| **Showcase** | Two engines duel on their own — per-side strength, 0.5×–4× pace, auto-rematch, still / follow / orbit camera, foldable rail |
-| **Attract** | Leave the menu alone for 30 seconds and a showcase duel starts behind it |
+| **漢甲軍團**(預設) | 楚漢相爭 3D 軍陣,`src/scene/chineseFigures.ts` 手寫程序化生成 |
+| **傳統棋子** | 木刻圓餅 + 楷體刻字,最傳統的樣貌 |
 
-Clocks: none, 5, 10 or 15 minutes, drawn as draining hourglasses.
+樣式記在 `localStorage`,切換即時生效。程式碼裡仍保留載入外部 rigged GLB 模型的完整
+管線(`src/scene/pieces.ts` + `src/assets/generated.ts`),想接自己的 3D 角色模型:
+把 GLB 丟進 `web/public/models/`、URL 填進 `PIECE_MODEL_URLS`,並恢復對應的
+`PieceStyle` 分支即可 — loader 會自動置中、縮放、落地,載入失敗會退回程序化棋子,
+**遊戲永遠玩得下去**。
 
-## Battlegrounds
+## 戰場場景
 
-Switchable at any time from the camera menu or Settings; each one is a complete relight.
+相機選單或設定隨時切換;每個場景是整套重新打光。
 
-| Id | Name | Look |
+| Id | 名稱 | 氛圍 |
 | --- | --- | --- |
-| `jungle` | **Azure Dragon Temple** (default) | Jade forest, drifting pollen, vermilion halls and stacked golden eaves |
-| `dawn` | **Golden Palace Court** | Morning light over red columns and palace lanterns — highest legibility |
-| `frost` | **Northern Snow Pass** | Overcast snowfield and cold flat light — hardest contrast on the sculpts |
-| `dusk` | **Red Cliffs Night Camp** | Palace lanterns, signal fires and the heaviest bloom |
+| `jungle` | **蒼龍山寺**(預設) | 松林山寺、飄散花粉、朱紅殿宇與金色屋簷 |
+| `dawn` | **金闕晨庭** | 晨光越過朱柱宮燈 — 可讀性最高 |
+| `frost` | **塞北雪關** | 陰天雪原冷平光 — 棋子對比最銳利 |
+| `dusk` | **赤壁夜營** | 宮燈、烽火與最重的光暈 |
 
-## Project structure
+## 專案結構
 
 ```
 .
-├── rork.json               workspace manifest (one app: web/)
+├── rork.json               workspace manifest(一個 app:web/)
+├── docs/                   MagicBlock 鏈上對戰規格
+├── magicblock/             Anchor 合約(xiangqi_match program)
+│   ├── programs/xiangqi_match/   狀態機、押注 escrow、結算、Ephemeral Rollup 委派
+│   └── keys/               program keypair 備份(gitignored)
 ├── scripts/
-│   └── rewrite-commit-messages.sh
 └── web/
     ├── index.html
-    ├── public/             icon, favicon, robots.txt (drop local .glb models here)
+    ├── public/             icon、favicon、音檔(可放本機 .glb 模型)
+    ├── scripts/e2e-devnet.mjs    Devnet 五條驗收鏈 e2e 腳本
     └── src/
-        ├── core/           Xiangqi state — never imports three.js
-        │   ├── gameController.ts   owns state, clocks, undo, AI turns, snapshots
-        │   ├── xiangqi.ts          legal moves, check and game results
-        │   ├── types.ts            MoveEvent, GameSnapshot, LedgerMove, …
-        │   └── emitter.ts          tiny typed event emitter
+        ├── core/           象棋規則 — 絕不 import three.js
+        │   ├── gameController.ts   狀態、時鐘、悔棋、AI 回合、快照
+        │   ├── xiangqi.ts          合法步、將軍與勝負判定
+        │   └── types.ts / emitter.ts
         ├── ai/
-        │   ├── engine.worker.ts    negamax + alpha-beta + quiescence + iterative deepening
-        │   └── aiClient.ts         main-thread handle, cancels stale searches
-        ├── scene/          three.js only
-        │   ├── sceneEngine.ts      renderer, camera, interaction, move animation, cinematics
-        │   ├── environment.ts      Chinese court, lanterns, lighting, particles, PMREM environment
-        │   ├── arena.ts            the four battleground looks and their ordering
-        │   ├── battlefield.ts      siege props, camps, fires, birds
-        │   ├── jungle.ts           forest canopy, vines, pollen and mountain temples
-        │   ├── board.ts            tiles, base, engraved labels, highlight pool
-        │   ├── pieces.ts           rigged GLB loading, clips, faction materials, mixers
-        │   ├── weapons.ts          procedural arms, shields and staves per rank
-        │   ├── rankBadges.ts       floating heraldic crests
-        │   ├── effects.ts          particle bursts, flashes, dissolve, camera shake
-        │   ├── strikes.ts          per-rank blow visuals (slash arc, ground wave, pillar)
-        │   ├── spells.ts           fireball orbs, per-army fire, the shared light pool
-        │   ├── postfx.ts           EffectComposer pipeline (bloom, SSAO, DOF, grade, SMAA, clarity)
-        │   ├── textures.ts         procedural marble, basalt, bronze, cloth
-        │   ├── quality.ts          graphics presets + auto-detection
-        │   └── tween.ts            promise-based tween engine
-        ├── ui/             React + CSS overlay
-        │   ├── GameShell.tsx       phases, settings, attract mode, keyboard shortcuts
-        │   ├── MainMenu.tsx        mode / colour / strength / clock selection
-        │   ├── Hud.tsx             top bar, spoils, chronicle sigil, showcase rail
-        │   ├── Tooltip.tsx         themed tooltip for the icon-only controls
-        │   ├── MoveLedger.tsx      the chronicle: move list, notation, hover preview
-        │   ├── SettingsPanel.tsx   graphics, arena, cinematics, sound
-        │   ├── Heraldry.tsx        crests, hourglasses, piece glyphs
-        │   └── medieval.css        the whole overlay's look
-        ├── audio/          Web Audio mixer with layered score stems
-        ├── assets/         URLs of the generated models and audio
-        └── components/ui/  shadcn/ui primitives
+        │   ├── engine.worker.ts    negamax + alpha-beta + 迭代加深
+        │   └── aiClient.ts         主執行緒握把,過期搜尋自動取消
+        ├── scene/          只有這裡碰 three.js
+        │   ├── sceneEngine.ts      renderer、鏡頭、互動、走棋動畫、運鏡
+        │   ├── chineseFigures.ts   楚漢軍團程序化棋子
+        │   ├── board.ts            木板棋面、傳統線圖、楚河漢界、高亮池
+        │   ├── pieces.ts           棋子工廠、樣式切換、GLB 管線(遺留)
+        │   ├── environment / arena / battlefield / jungle   大殿、場景、戰場、山林
+        │   ├── effects / strikes / spells    粒子、打擊、法術特效
+        │   ├── rankBadges.ts       浮空徽章與戰術棋標
+        │   ├── postfx.ts           bloom、SSAO、DOF、調色、SMAA
+        │   ├── textures.ts         程序化木紋、石材、布料
+        │   └── quality.ts          畫質預設 + 自動偵測
+        ├── magicblock/     鏈上對戰(matchClient、大廳、IDL)
+        ├── ui/             React 覆蓋層(GameShell、選單、HUD、設定、棋譜)
+        ├── audio/          Web Audio 混音器
+        └── assets/         外部資源 URL 清單
 ```
 
-## Architecture
+## 架構
 
-Rendering is fully decoupled from the rules: **the Xiangqi core emits events and the scene
-subscribes to them.** Nothing in `src/core` imports three.js, so the game logic is testable
-headlessly and the renderer is replaceable.
+渲染與規則完全解耦:**象棋核心發事件,場景訂閱事件。** `src/core` 不 import
+three.js,遊戲邏輯可以 headless 測試,渲染器可以整個換掉。
 
-### Move flow
+走棋流程:
 
-1. The player (or the worker) produces a move → `GameController.tryMove`.
-2. `Xiangqi` validates it and the controller builds a `MoveEvent` with capture and check flags.
-3. The controller **awaits the animator the scene registered**, so the engine never moves
-   while a figure is still gliding.
-4. React re-renders from the immutable `GameSnapshot` published after every change.
+1. 玩家(或 worker)產生一步 → `GameController.tryMove`
+2. `Xiangqi` 驗證合法性,controller 帶著吃子/將軍旗標發出 `MoveEvent`
+3. controller **await 場景註冊的動畫器**,棋子還在走路時引擎不會搶跑
+4. React 從每次變更後發布的 immutable `GameSnapshot` 重繪
 
-### State
+單一資料源(`GameController`),React 經 `useGameSnapshot` hook 訂閱 — 沒有全域
+store,遊戲狀態也不會 prop-drill 進場景。
 
-There is exactly one source of truth (`GameController`). React reads it through the
-`useGameSnapshot` hook, which subscribes to the emitter and returns the latest snapshot —
-no global store, no prop drilling of game state into the scene.
+## 電腦對手
 
-## The computer opponent
-
-| Difficulty | Search | Budget |
+| 難度 | 搜尋 | 時間 |
 | --- | --- | --- |
-| **Easy** — *Squire* | Random legal move, with a bias toward captures | instant |
-| **Medium** — *Knight* | Depth 2 negamax + alpha-beta, material evaluation | 0.5 s |
-| **Hard** — *Warlord* | Depth 3 negamax + alpha-beta, capture ordering | 1.8 s |
+| **簡單** — 新兵 | 隨機合法步,偏好吃子 | 即時 |
+| **普通** — 軍師 | 深度 2 negamax + alpha-beta,子力評估 | 0.5 s |
+| **困難** — 大將 | 深度 3 negamax + alpha-beta,吃子排序 | 1.8 s |
 
-All searches run inside `engine.worker.ts`. `aiClient.ts` cancels a stale search whenever the
-position changes, so undo and resign are instant.
+搜尋全部在 `engine.worker.ts` 裡跑;局面一變,`aiClient.ts` 就取消過期搜尋,
+所以悔棋、認輸都是即時的。
 
-## Graphics presets
+## 畫質預設
 
-| Preset | Post-processing | Shadow map | Particles |
+| 預設 | 後製 | 陰影貼圖 | 粒子 |
 | --- | --- | --- | --- |
-| Low | none (direct render) | off | none |
-| Medium | bloom, grade, SMAA | 1024 | light |
-| High | + depth of field in cinematics | 2048 | full |
-| Ultra | + SSAO | 4096 | dense |
+| 低 | 無(直接渲染) | 關 | 無 |
+| 中 | 光暈、調色、SMAA | 1024 | 少量 |
+| 高 | + 運鏡景深 | 2048 | 完整 |
+| 極高 | + SSAO | 4096 | 密集 |
 
-The preset is auto-detected on first load from the GPU string, core count and device memory.
-The engine steps down one level automatically if the measured frame rate stays under 40 FPS.
-Pixel ratio is capped at 2 (1 on Low), and a lost WebGL context shows a reload prompt instead
-of a black screen.
+首次載入依 GPU 字串、核心數與記憶體自動選檔;實測幀率持續低於 40 FPS 自動降一檔。
+Pixel ratio 上限 2(低檔為 1),WebGL context 遺失會顯示重載提示而不是黑畫面。
 
-### Black-screen recovery
+## 黑畫面救援
 
-Some drivers — Mesa's software rasterisers above all, which is what a Linux box without working
-hardware acceleration falls back to — draw an all-black scene under a perfectly fine interface.
-Three independent causes have been seen: the post-processing composer returning an empty buffer,
-the PMREM reflection probe sampling as `NaN` (which poisons every lit surface while emissive
-sprites keep drawing), and the shadow maps.
+部分驅動(尤其 Linux 無硬體加速時退回的 Mesa 軟體光柵器)會在介面正常的情況下把
+場景畫全黑。引擎自動處理三種已知成因:
 
-The engine handles all three without being asked:
+- **反射探針自檢**(`scene/diagnostics.ts`)— 開機時用探針獨立照亮一顆白球渲染到
+  8×8 buffer 讀回,全黑就棄用探針、改用同色環境光。
+- **幀看門狗** — 開頭八秒取樣五次(中央 + 四象限),全黑才逐層剝除:後製 →
+  反射探針 → 安全渲染,並用通知說明發生了什麼;退到安全渲染的選擇會記住。
+- 手動控制在 **設定 → 影像**:亮度(曝光 60–180%)與安全顯示模式;網址帶 `?safe=1`
+  可從第一幀強制安全渲染。
 
-- **Probe self-test** (`scene/diagnostics.ts`) — at boot, a white sphere lit *only* by the freshly
-  built probe is rendered into an 8×8 buffer and read back. Black means the probe is unusable, so
-  it is dropped and an ambient skylight of the same colour takes over.
-- **Frame watchdog** — the frame is sampled five times over the first eight seconds at five points
-  (centre plus quadrants). All five have to come back black before anything is dropped, then each
-  failed sample peels off one more layer: post-processing → reflection probe → safe rendering.
-- **A notice explains what happened**, and once it falls all the way back to safe rendering the
-  choice is remembered in `localStorage` so the next visit starts with a picture.
+## 音效
 
-Manual controls in **Settings → Picture**:
+背景配樂為 **Chinese Guzheng 1**(作者 `u_ej49m6thqx`,
+[Pixabay](https://pixabay.com/music/china-chinese-guzheng-1-308264/),依
+[Pixabay Content License](https://pixabay.com/service/license-summary/) 使用,
+出處記錄在 `web/public/audio/LICENSE.md`);將軍與終盤會疊入本地生成的戰鼓聲部。
 
-| Control | Effect |
+腳步聲、落子木響、倒地與 UI 音全部用 oscillator 與 noise buffer 合成 — 不需音檔。
+所有聲音走同一個 master gain(靜音開關),並遵守瀏覽器 autoplay 政策在首次互動後
+才出聲。
+
+> **外部資源注意**:部分取樣音效仍從 `src/assets/generated.ts` 列的遠端 URL 串流。
+> 要正式營運請鏡像到 `web/public/` 並改掉常數,別依賴別人的 CDN。
+
+## 鏈上對戰(MagicBlock)
+
+`magicblock/` 內含完整的 Anchor 合約:建房押注(SOL escrow)、加入、鏈上走棋驗證
+(完整象棋規則在鏈上重跑)、提和、逾時判負、取消退款、終局結算,以及 MagicBlock
+Ephemeral Rollup 的 delegate / commit / undelegate 流程。前端 `src/magicblock/`
+有對應的 client、大廳與對局 UI。
+
+狀態:**程式完成、本地測試全過(cargo test + IDL 驗證),Devnet 尚未部署**。
+部署與五條端到端驗收鏈(取消退款、紅勝、黑勝、和局、逾時)的腳本在
+`web/scripts/e2e-devnet.mjs`,流程見 [`magicblock/README.md`](magicblock/README.md)
+與 [`docs/magicblock-onchain-xiangqi-spec.md`](docs/magicblock-onchain-xiangqi-spec.md)。
+
+## 指令
+
+在 `web/` 下執行:
+
+| 指令 | 功能 |
 | --- | --- |
-| Brightness | Tone-mapping exposure multiplier, 60–180% |
-| Safe rendering | No composer, no reflection probe, no shadow maps, +20% exposure |
+| `npm run dev` | Vite dev server(HMR) |
+| `npm run build` | production build 到 `dist/` |
+| `npm run preview` | 本機預覽 build |
+| `npm run lint` | 全專案 ESLint |
+| `npm test` | Node 單元測試 + 瀏覽器測試 |
+| `npm run test:watch` | Vitest watch 模式 |
 
-`?safe=1` in the URL forces safe rendering on from the first frame, and the driver string is
-printed to the console (`[scene] gpu: …`) and shown under the graphics presets.
+## 瀏覽器支援
 
-## Character animation
+任何支援 **WebGL 2** 與 **Web Audio** 的瀏覽器:現行 Chrome、Edge、Firefox 與
+Safari 16+,桌機與平板皆可。支援觸控旋轉、雙指縮放與點擊走棋;窄螢幕時棋譜收進
+角落按鈕,棋盤佔滿整個視口。
 
-Every figure is a rigged (skinned) character with up to five skeletal clips, declared per rank
-in `PIECE_ANIMATED_MODELS` (`src/assets/generated.ts`):
+Linux 使用者先查 `chrome://gpu` / `about:support`:沒有硬體加速會退回 llvmpipe
+軟渲染 — 遊戲仍可玩(見[黑畫面救援](#黑畫面救援)),但請預期低檔幀率。
 
-| Clip | When it plays |
-| --- | --- |
-| `idle` | Looping combat stance, desynced per figure so the army does not breathe in lockstep |
-| `walk` | Looping in-place stride, retimed to the cadence of the move that is under way |
-| `run` | Looping in-place run — the knight charging through its leap (knights only) |
-| `attack` | One-shot strike the moment a capture lands — sparks, shake and clash are timed to the hit frame. For the queen and the mage the same clip is the incantation, and its hit frame is the moment the fireball is released |
-| `death` | One-shot fall played by the captured figure before it dissolves into dust |
+## 貢獻
 
-How it is wired (`src/scene/pieces.ts`):
+歡迎 issue 與 pull request — 流程、程式慣例與 **英文 Conventional Commits** 訊息
+格式見 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-- The **rigged** GLB is the visual — the plain GLB has no skeleton, so clips bound to it do
-  nothing. Each animation GLB contributes one clip, renamed to `idle` / `walk` / `run` /
-  `attack` / `death`.
-- Every instance is cloned with `SkeletonUtils.clone` (never `Object3D.clone`) and gets its
-  own `AnimationMixer`. One-shots use `LoopOnce` + `clampWhenFinished`, and the strike
-  crossfades back to the stance on the mixer's `finished` event.
-- Clip root motion is stripped on X/Z so a figure never walks off its square; the death clip
-  keeps its motion so the fall reads properly. The locomotion clips are **in-place** cycles for
-  the same reason — board travel is owned by the container tween, so a clip carrying root
-  translation would double the distance.
-- The **Low** preset freezes the stance on its first frame (no per-frame mixer cost) — strikes
-  and deaths still play, and the figure slides instead of marching (footsteps still sound).
-- **Clips load in waves, not in one burst.** Twelve rigs × five clips is over seventy GLBs;
-  firing them at once made the browser drop requests (`TypeError: Failed to fetch`) and figures
-  silently lost their strike, so a capture looked like a piece dying untouched. The rig plus its
-  `idle` load first, then `PieceFactory.warmClips()` pulls `attack` → `death` → `walk` → `run`
-  two downloads wide, and every clip that lands is bound onto the figures already on the board
-  (`PieceView.installClip`). A capture additionally calls `ensureClip` for the attacker's strike
-  and the victim's death, so the beat waits (max 2.4 s) for its animation instead of skipping it.
-- If a strike clip is genuinely unavailable, `SceneEngine.lunge()` performs the swing by hand —
-  wind-up, twist, lean back, then the blow over the top. The tilt is held through
-  `PieceView.setStrikeTilt()` and re-applied after the mixer, which otherwise owns the pose.
-
-### Marching and footsteps
-
-`SceneEngine.glide()` owns one stride clock per move (`src/scene/sceneEngine.ts`):
-
-1. `GAITS[kind]` declares steps per square, cadence, boot timbre and loudness for the rank.
-2. `steps = tiles × stepsPerTile`, and the move's duration is `steps / cadence` — a longer
-   move takes **more steps**, not a faster slide.
-3. `PieceView.startMarch(clip, stepRate)` retimes the walk cycle so one gait cycle equals two
-   footfalls at exactly that rate, so the skeleton cannot drift out of the clock.
-4. `strideEasing()` gives the move a push-off, a constant-speed cruise and a settle. A fully
-   eased curve would leave the feet skating at both ends against a fixed cadence.
-5. Each whole step crossing fires `audio.footstep()` (panned by screen position, alternating
-   feet, pitch-jittered) plus a small grit puff at the contact point.
-
-Footsteps are fully synthesised in `src/audio/audioManager.ts` — a low body thump for the
-weight, a band-passed noise transient for the sole, and a metallic afterring for armour, one
-voice per `FootstepTimbre` (`scuff` / `leather` / `plate` / `regal`). No asset, no latency.
-
-### Strikes by rank
-
-The hand-to-hand beat is one piece of choreography — charge, square up, strike, crumble — but
-its weight is read out of `STRIKES[kind]` in `src/scene/sceneEngine.ts`, so the same code carries
-a footsoldier's stab and a royal execution. The pawn's line is the original beat and is left
-exactly as it was; everything above it is measured against it:
-
-| Rank | What is added on top of the pawn's beat |
-| --- | --- |
-| Pawn (`p`) | The baseline: 5.5° lens punch, sparks, one camera kick |
-| Knight (`n`) | Fastest charge, a crescent of steel through the body (`spawnSlash`), dust torn up along the line of the charge, a light aftershock |
-| Bishop (`b`) | Safety net only — the mage fights at range |
-| Rook (`r`) | Slowest wind-up, heaviest swing in the mix, a wave rolling out across the stone (`spawnGroundWave`) with a second echo, low-frequency slam, long aftershock |
-| Queen (`q`) | Safety net only — the sorceress fights at range |
-| King (`k`) | A column of light dropped on the condemned before the blow (`spawnPillar` + `judgementToll`), 11° lens punch, gold arc **and** gold ground wave, the longest hitstop and aftershock |
-
-The supporting visuals live in `src/scene/strikes.ts` (`spawnSlash`, `spawnGroundWave`,
-`spawnPillar`). Each one builds a throwaway object, animates it off the caller's tween clock and
-disposes itself, so none of them needs a slot in the frame loop; the textures and geometry are
-shared module singletons freed by `disposeStrikeAssets()`. The swing, the slam and the bell
-(`bladeWhoosh`, `groundSlam`, `judgementToll`) are synthesised in the mixer alongside the
-footsteps — no assets.
-
-### Ranged combat (queen and mage)
-
-`RANGED_KINDS` in `src/scene/sceneEngine.ts` routes captures by the queen (`q`) and the mage
-(`b`) to `playSpellCinematic()` instead of the melee beat, in this order:
-
-1. Caster and target turn to face each other; the caster does not move off its square.
-2. `gatherSpell()` grows a `SpellOrb` (`src/scene/spells.ts`) at the weapon's casting point
-   for the length of the strike clip's wind-up, pulling embers inward over a rising charge.
-3. `throwFireball()` flies the orb to the target's chest on a flat arc, shedding embers and
-   smoke; flight time scales with the distance actually crossed.
-4. `spellBurst()` lands it — flash, fire shell, ember cloud, square impact and camera kick.
-5. `slay()` then `banish()` run to completion, so the target is **dead and gone** before the
-   caster takes a step, and only then does `glide()` march it onto the cleared square.
-
-How much fire is thrown is a profile too — `MAGE_SPELL` versus `QUEEN_SPELL`. The mage holds a
-small orb and throws a single bolt. The sorceress gathers roughly half again as long, holds a
-much larger ball, and throws a **volley of three**: two smaller leaders that come in off the
-shoulder and clap on the body first, then the killing bolt behind them, whose blast is 1.75× the
-mage's and rolls a ring of fire out across the square.
-
-The casting point is a marker parented at the head of the main weapon (`focus` in
-`src/scene/weapons.ts`), read out of the live pose each frame, so the fire hangs off the
-crystal wherever the casting arm swings it. `SPELL_LOOK` gives each army its own fire. The three
-spell voices (charge, cast, impact) are synthesised alongside the footsteps — no assets.
-
-**The fire's light comes from a fixed pool.** `SpellLightPool` (`src/scene/spells.ts`) creates
-three point lights once with the scene and lends them out per bolt. A light created per fireball
-crashed the tab: three.js keys its shader programs on the scene's light counts, so every material
-in the hall recompiled mid-fight. Pooled lights are never removed *or hidden* — an invisible
-light is dropped from the render state, which changes the count exactly as removing it would —
-they are only dimmed to zero and handed back. A fourth simultaneous bolt simply gets no light
-instead of a recompile, and the pool is empty on presets without post-processing.
-
-The capture dissolve is a shader injection: a noise field eats the body from the soles up with
-a glowing burn edge, while the whole mesh fades and sheds upward-drifting motes.
-
-## Swapping in your own models
-
-The sculpts are referenced by URL in `src/assets/generated.ts`:
-
-```ts
-export const PIECE_MODEL_URLS: Record<Faction, Roster<string>> = {
-  w: { k: "…king.glb", q: "…queen.glb", /* … */ },
-  b: { /* … */ },
-};
-```
-
-Drop glTF/GLB characters into `web/public/models/` and point the entries at
-`/models/your-king.glb`. Requirements:
-
-- **Orientation** — Y-up, facing +Z, or edit `PIECE_MODEL_ORIENTATION` in the same file; the
-  loader derives the correction quaternion from the declared front/up axes.
-- **Scale** — any. `PieceFactory.normalize()` measures the model, rescales it to the height in
-  `PIECE_HEIGHT` (`src/scene/pieces.ts`), centres it on X/Z and grounds it on Y.
-- **Materials** are cloned per instance and tinted per faction in `applyFactionLook()`.
-
-If a rigged model fails to download the loader falls back to the static sculpt, and if that
-fails too, to a procedural primitive figure — **the game always stays playable**.
-
-To animate your own characters, add a `PIECE_ANIMATED_MODELS` entry with a rigged GLB plus one
-GLB per clip; any missing clip is simply skipped (no `walk` clip just means that rank slides),
-and a clip that fails to download is retried on demand the next time the game needs it.
-
-For shipping, compress the GLBs instead of streaming them from a remote host:
-
-```bash
-bunx @gltf-transform/cli optimize king.glb public/models/king.glb \
-  --compress draco --texture-compress webp --texture-size 1024
-```
-
-## Audio
-
-Ambient and one-shot MP3s are streamed once and decoded into Web Audio buffers. The background
-score is **Chinese Guzheng 1** by `u_ej49m6thqx`, downloaded from
-[Pixabay](https://pixabay.com/music/china-chinese-guzheng-1-308264/) and used under the
-[Pixabay Content License](https://pixabay.com/service/license-summary/). A locally generated low
-war-drum stem crossfades in during check and the endgame. Full provenance is recorded beside the
-asset in `web/public/audio/LICENSE.md`. The twelve death cries in `DEATH_CRY_URLS` are lazily loaded after the
-mixer unlocks, since they are only needed on a capture; each is a real one-second take, panned
-by the dying figure's screen position and pitch-jittered per playback.
-
-Footsteps, the wooden set-down knock, body falls and UI blips are synthesised with oscillators
-and noise buffers — no files. Everything routes through one master gain
-for the mute toggle, and playback only starts after the first user gesture (browser autoplay
-policy).
-
-> **Note on hosted assets.** Out of the box, the models and sampled sound effects are streamed from remote
-> URLs listed in `src/assets/generated.ts`. If you fork this for production, mirror them into
-> `web/public/` and update those constants so your build does not depend on someone else's CDN.
-
-## Scripts
-
-Run from `web/`:
-
-| Script | What it does |
-| --- | --- |
-| `bun run dev` | Vite dev server with HMR |
-| `bun run build` | Type-checked production build into `dist/` |
-| `bun run preview` | Serve the production build locally |
-| `bun run lint` | ESLint over the whole project |
-| `bun run test` | Node unit tests **and** the Playwright-backed browser tests |
-| `bun run test:watch` | Vitest in watch mode |
-| `bun run test:browser` | Browser-mode Vitest only |
-
-## Browser support
-
-Any browser with **WebGL 2** and **Web Audio**: current Chrome, Edge, Firefox and Safari 16+,
-on desktop and tablet. Touch orbit, pinch zoom and tap-to-move are supported; on narrow
-screens the move ledger folds into a corner button so the board keeps the whole viewport.
-
-On Linux, check `chrome://gpu` / `about:support` first: without hardware acceleration the browser
-falls back to llvmpipe, and the scene is then rendered by the CPU. The game still runs — see
-[Black-screen recovery](#black-screen-recovery) — but expect Low preset frame rates.
-
-## Contributing
-
-Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the
-workflow, coding conventions and the **English Conventional Commits** message format used in
-this repository.
-
-## License
+## 授權
 
 [MIT](LICENSE) © the King's Gambit contributors.
 
-Bundled dependencies keep their own licences: three.js (MIT), chess.js (BSD-2-Clause),
-React (MIT), Tailwind CSS (MIT), Radix UI / shadcn/ui (MIT), lucide (ISC).
+隨附相依套件保留各自授權:three.js(MIT)、React(MIT)、Tailwind CSS(MIT)、
+Radix UI / shadcn/ui(MIT)、lucide(ISC)。
 
-The 3D characters and audio shipped with the project were generated for it and may be reused
-under the same terms; if you replace them, credit the new authors here.
+專案內生成的 3D 資源與音效可依相同條款重用;若你替換了它們,請在此標註新作者。

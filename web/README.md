@@ -1,271 +1,53 @@
-# 赤壁象棋 — the app
+# 赤壁象棋 — app 本體
 
-This folder holds the game itself. For the project overview, features, architecture notes and
-contribution guide, read the [root README](../README.md) and [CONTRIBUTING.md](../CONTRIBUTING.md).
+這個資料夾是遊戲本身。專案總覽、特色、操作方式、架構說明與貢獻流程請看
+[根目錄 README](../README.md) 與 [CONTRIBUTING.md](../CONTRIBUTING.md)。
 
-A cinematic 3D Chinese chess game: sculpted soldiers fighting as Red and Black in a Chinese
-mountain-temple command court on a 9×10 marble-and-basalt Xiangqi board. Built with Vite + React + TypeScript + three.js, with
-a native Xiangqi rules engine and a Web Worker search engine for the computer opponent.
+## 安裝與啟動
 
-## Setup
+需要 **Node 20+**(npm / pnpm / bun 皆可,repo 附 `package-lock.json`)。
 
 ```bash
-bun install   # or npm install
-bun run dev   # or npm run dev  → http://localhost:8080
-bun run build # production bundle in dist/
-bun run preview
+npm install
+npm run dev       # http://localhost:8080
+npm run build     # production bundle 輸出到 dist/
+npm run preview   # 本機預覽 build 結果
 ```
 
-建立 `web/.env.local` 並填入 Privy 公開 App ID：
+## 環境變數(選配)
+
+不設定任何環境變數就是純單機版(人機 / 雙人 / 自動演武),不需登入。
+
+要開「鏈上對戰」才需要 Privy:複製 `.env.example` 為 `.env.local` 並填入:
 
 ```bash
-VITE_PRIVY_APP_ID=your-privy-app-id
+VITE_PRIVY_APP_ID=你的-privy-app-id
 ```
 
-登入方法由 Privy Dashboard 控制。登入後可遊玩本機模式；「鏈上對戰」會建立或加入
-Solana Devnet 房間，每方固定押入 0.01 devSOL，並透過 MagicBlock Ephemeral Rollup
-同步走棋。Devnet 測試幣沒有真實金錢價值。
+Privy App ID 是公開識別碼,可以安全地曝露給瀏覽器;登入方式由
+[Privy Dashboard](https://dashboard.privy.io) 控制。設定後選單會出現「鏈上對戰」
+分頁:兩個 Solana 錢包各押 0.01 devSOL 開房,走棋經 MagicBlock Ephemeral Rollup
+同步(Devnet 測試幣沒有真實金錢價值)。合約與流程見
+[`../magicblock/README.md`](../magicblock/README.md)。
 
-## Controls
+## 指令
 
-| Action | Input |
+| 指令 | 功能 |
 | --- | --- |
-| Orbit / zoom | Drag, mouse wheel (pinch on touch) |
-| Select a figure | Click it (legal squares glow green, captures red) |
-| Move | Click a highlighted square (click the figure again to deselect) |
-| Camera & battleground | Camera icon in the top bar (presets, flip, tactical, the four arenas) |
-| What a button does | Hover, focus or tap it — every icon carries a tooltip |
-| Skip the intro | Click anywhere during the opening sweep |
-| Settings | Gear icon (graphics preset, capture cinematics, board swing, sound) |
+| `npm run dev` | Vite dev server(HMR) |
+| `npm run build` | production build 到 `dist/` |
+| `npm run preview` | 本機預覽 build |
+| `npm run lint` | ESLint |
+| `npm test` | Node 單元測試 + 瀏覽器測試 |
+| `npm run test:watch` | Vitest watch 模式 |
+| `npm run test:browser` | 只跑瀏覽器模式測試 |
 
-There is no drag-and-drop; both selecting and moving resolve on pointer release, and a press
-that travels more than 8px counts as a camera swing instead.
+## 部署
 
-| Key | Action |
-| --- | --- |
-| `F` | Flip the camera to the other side |
-| `T` | Toggle the 2D tactical view |
-| `H` | Open / fold the chronicle |
-| `C` | Cinema mode — hide the whole overlay |
-| `Space` | Pause / resume a showcase duel |
-| `Esc` | Close the settings panel, camera menu, chronicle or tooltip |
-
-## Overlay
-
-`GameShell.tsx` owns the phases (loading → menu → playing), the settings, attract mode and the
-keyboard shortcuts; `Hud.tsx` is everything on screen during a game. The board keeps the
-viewport: the turn slate and the icon rail sit in the top corners, the spoils panel is desktop-only,
-the move record lives behind a corner sigil (`H`), and the showcase transport is a slim
-bottom-right rail that folds down to a single icon.
-
-`Tooltip.tsx` explains the icon-only controls — name, one sentence, and a key cap when there is a
-shortcut. It opens after 110 ms, then instantly for the rest of a sweep along the rail, aligns to
-whichever screen edge keeps it visible, flashes for 1.8 s on a touch press, and closes on Escape,
-blur or scroll. It renders inside its anchor rather than a body portal so it survives fullscreen.
-
-## Architecture
-
-Rendering is fully decoupled from the rules: the Xiangqi core emits events and the scene
-subscribes to them. Nothing in `src/core` imports three.js.
-
-```
-src/
-  core/            Xiangqi state, no rendering
-    gameController.ts  owns Xiangqi state, clocks, undo, AI turns, snapshots
-    xiangqi.ts          legal moves, check and game results
-    types.ts           shared game types (MoveEvent, GameSnapshot, …)
-    emitter.ts         tiny typed event emitter
-  ai/
-    engine.worker.ts   negamax + alpha-beta + quiescence + iterative deepening
-    aiClient.ts        main-thread handle, cancels stale searches
-  scene/             three.js only
-    sceneEngine.ts     renderer, camera, interaction, marching, combat choreography
-    environment.ts     Chinese court, palace lanterns, lighting and particles
-    arena.ts           the four battleground looks
-    battlefield.ts     siege props, camps, fires, birds
-    jungle.ts          forest canopy, vines, pollen and mountain temples
-    board.ts           tiles, base, engraved labels, highlight pool
-    pieces.ts          rigged GLB loading, skeletal clips, faction materials, mixers
-    weapons.ts         procedural arms, shields and staves per rank
-    rankBadges.ts      floating heraldic crests
-    effects.ts         particle bursts, flashes, dissolve, camera shake
-    strikes.ts         per-rank blow visuals (slash arc, ground wave, pillar)
-    spells.ts          fireball orbs, per-army fire, the shared light pool
-    postfx.ts          EffectComposer pipeline (bloom, SSAO, DOF, grade, SMAA, clarity)
-    textures.ts        procedural marble, basalt, bronze, cloth
-    quality.ts         graphics presets + auto-detection
-    tween.ts           promise-based tween engine
-  ui/                plain React + CSS overlay
-    GameShell.tsx      phases, settings, attract mode, shortcuts
-    Hud.tsx            top bar, spoils, chronicle sigil, showcase rail
-    Tooltip.tsx        themed tooltip for the icon-only controls
-    MainMenu.tsx / MoveLedger.tsx / SettingsPanel.tsx / GameOverModal.tsx / Heraldry.tsx
-    medieval.css       the whole overlay's look
-  audio/             Web Audio mixer with layered score stems
-  assets/generated.ts  URLs of the generated models and audio
-```
-
-### Move flow
-
-1. The player (or the worker) produces a move → `GameController.tryMove`.
-2. `Xiangqi` validates it and the controller builds a `MoveEvent` with capture and check flags.
-3. The controller awaits the animator the scene registered, so the AI never moves while
-   a figure is still gliding.
-4. React re-renders from the immutable snapshot published after every change.
-
-### The computer opponent
-
-- **Easy** — random legal move, with a bias toward captures.
-- **Medium** — depth 2 negamax with alpha-beta and material evaluation, 0.5s budget.
-- **Hard** — depth 3 negamax with alpha-beta and capture ordering, 1.8s budget.
-
-All searches run in `engine.worker.ts`, so the render loop never blocks.
-
-## Graphics presets
-
-| Preset | Post-processing | Shadows | Particles |
-| --- | --- | --- | --- |
-| Low | none (direct render) | off | none |
-| Medium | bloom, grade, SMAA | 1024 | light |
-| High | + depth of field in cinematics | 2048 | full |
-| Ultra | + SSAO | 4096 | dense |
-
-The preset is auto-detected on first load from the GPU string, core count and memory, and
-the engine steps down once automatically if the measured frame rate stays under 40 FPS.
-Pixel ratio is capped at 2 (1 on Low), and WebGL context loss shows a reload prompt.
-
-### Black-screen recovery
-
-Drivers that render an all-black scene under a working interface (Mesa's software rasterisers on
-Linux above all) are handled in three places:
-
-- `scene/diagnostics.ts` — `probeGpu` names the driver, `reflectionProbeWorks` renders a white
-  sphere lit only by the freshly built PMREM probe into an 8×8 buffer and reads it back. Black or
-  `NaN` means the probe is unusable, so `SceneEngine.applyEnvironment` drops it and turns up an
-  ambient skylight of the same colour instead.
-- `SceneEngine.guardAgainstBlackFrames` — samples the frame at five points (centre plus quadrants)
-  five times over the first eight seconds. All five points must read black before anything is
-  dropped; each failed sample peels off one more layer: composer → reflection probe → safe mode.
-- **Settings → Picture** — a brightness slider (exposure ×0.6–1.8) and a `Safe rendering` toggle
-  (`SceneEngine.setSafeMode`: no composer, no probe, no shadow maps, +20% exposure). Both are
-  persisted in `localStorage` under `kg.render`, and `?safe=1` forces safe rendering from boot.
-
-A showcase duel adds a **clarity grade** on top of the preset (`Postfx.setClarity`): no depth of
-field, grain ×0.3, vignette ×0.5 and bloom ×0.62 at a higher threshold, because a duel that is
-watched rather than played needs the sculpts and the squares to read.
-
-## Character animation
-
-Every figure is a rigged (skinned) character with up to five skeletal clips, listed per kind in
-`PIECE_ANIMATED_MODELS` (`src/assets/generated.ts`):
-
-| Clip | When it plays |
-| --- | --- |
-| `idle` | Looping combat stance, desynced per figure so the army does not breathe in lockstep |
-| `walk` | Looping in-place stride, retimed to the cadence of the move under way |
-| `run` | Looping in-place run — the knight charging through its leap (knights only) |
-| `attack` | One-shot strike the moment the attacker lands a capture (sparks, shake and clash sound are timed to the hit frame). For the queen and the mage the same clip is the incantation, and its hit frame releases the fire |
-| `death` | One-shot fall played by the captured figure before it dissolves into dust |
-
-How it is wired (`src/scene/pieces.ts`):
-
-- The **rigged** GLB is the visual — the plain GLB has no skeleton, so clips bound to it do
-  nothing. Each animation GLB contributes one clip, renamed to `idle` / `walk` / `run` /
-  `attack` / `death`.
-- Every instance is cloned with `SkeletonUtils.clone` (never `Object3D.clone`) and gets its
-  own `AnimationMixer`; one-shots use `LoopOnce` + `clampWhenFinished`, and the strike
-  crossfades back to the stance on the mixer's `finished` event.
-- Clip root motion is stripped on X/Z so a figure never walks off its square; the death clip
-  keeps its motion so the fall reads properly. Locomotion clips are **in-place** cycles — board
-  travel belongs to the container tween, so a clip carrying root translation would double it.
-- The **Low** preset freezes the stance on its first frame (no per-frame mixer cost); strikes,
-  deaths and footstep sounds still play, and the figure slides instead of marching.
-- **Clips load in waves.** Over seventy GLBs fired at once made the browser drop requests
-  (`TypeError: Failed to fetch`), which cost figures their strike — a capture then looked like a
-  piece dying untouched. The rig plus its `idle` load first, then `PieceFactory.warmClips()`
-  fetches `attack` → `death` → `walk` → `run` two downloads wide and binds each clip onto the
-  figures already on the board (`PieceView.installClip`). A capture also calls `ensureClip` for
-  the attacker's strike and the victim's death, waiting up to 2.4 s rather than skipping the beat.
-- With no strike clip at all, `SceneEngine.lunge()` swings by hand (wind-up, twist, lean back,
-  blow over the top); the tilt is held by `PieceView.setStrikeTilt()` so the mixer cannot wipe it.
-
-### Marching and footsteps
-
-`SceneEngine.glide()` runs one stride clock per move. `GAITS[kind]` declares steps per square,
-cadence, boot timbre and loudness, so `steps = tiles × stepsPerTile` and the duration is
-`steps / cadence` — a longer move takes **more steps**, not a faster slide.
-`PieceView.startMarch(clip, stepRate)` retimes the walk cycle so one gait cycle is exactly two
-footfalls at that rate, `strideEasing()` gives a push-off, a cruise and a settle (a fully eased
-curve would leave the feet skating), and every whole step fires `audio.footstep()` plus a grit
-puff at the contact point. The four timbres (`scuff` / `leather` / `plate` / `regal`) are
-synthesised in `src/audio/audioManager.ts` — body thump, band-passed sole transient, metallic
-afterring — panned by screen position and pitch-jittered.
-
-### Strike weight by rank
-
-The hand-to-hand beat is one piece of choreography, but its weight comes from `STRIKES[kind]`
-in `src/scene/sceneEngine.ts`. The pawn's line is the original beat and is unchanged; each rank
-above it adds something: the knight a crescent of steel and a dust wake on the charge, the rook a
-wave rolling across the stone with a low slam and a long aftershock, the king a column of light
-dropped on the condemned, a bell, and a gold arc plus gold ground wave. Ranged captures follow
-the same idea — `MAGE_SPELL` throws one bolt, `QUEEN_SPELL` gathers longer and throws a volley of
-three that leaves fire burning on the square. Visuals live in `src/scene/strikes.ts`, and the
-swing / slam / bell voices are synthesised in the mixer.
-
-### Ranged captures
-
-`RANGED_KINDS` routes the queen (`q`) and the mage (`b`) to `playSpellCinematic()`: both sides turn
-to face each other, fire gathers at the staff crystal through the strike clip's wind-up, the bolt
-flies to the target's chest and breaks open — and the victim **dies and is cleared away before the
-caster takes a single step** onto the square.
-
-The fire's light comes from `SpellLightPool` (`src/scene/spells.ts`): three point lights created
-once with the scene and lent out per bolt. A light per fireball crashed the tab — three.js keys
-its shader programs on the scene's light counts, so the whole hall recompiled mid-fight. Pooled
-lights are never removed *or hidden* (an invisible light leaves the render state, which changes
-the count just as removing it would); they are dimmed to zero and handed back, and a fourth
-simultaneous bolt simply gets no light.
-
-## Swapping in different character models
-
-The static fallback sculpts are referenced by URL in `src/assets/generated.ts`:
-
-```ts
-export const PIECE_MODEL_URLS: Record<PieceKind, string> = {
-  k: "…king.glb",
-  q: "…queen.glb",
-  /* … */
-};
-```
-
-Drop higher-quality glTF/GLB characters into `public/models/` and point the entries at
-`/models/your-king.glb`. Requirements:
-
-- Y-up, facing +Z (or edit `PIECE_MODEL_ORIENTATION` in the same file — the loader derives
-  the correction quaternion from the declared front/up axes).
-- Any scale: `PieceFactory.normalize()` measures the model and rescales it to the height in
-  `PIECE_HEIGHT` (`src/scene/pieces.ts`), then centres it on X/Z and grounds it on Y.
-- Materials are cloned per instance and tinted per faction in `applyFactionLook()`.
-
-If a rigged model fails to download the loader falls back to the static sculpt, and if that
-fails too, to a procedural primitive figure — the game always stays playable.
-
-To animate your own characters, add a `PIECE_ANIMATED_MODELS` entry with a rigged GLB plus a
-GLB per clip; any missing clip is simply skipped, and a clip whose download failed is retried on
-demand the next time the game needs it.
-
-For shipping, compress the GLBs instead of streaming them from a remote host:
+`dist/` 是純靜態網站,任何靜態託管都能放。目前的正式站:
 
 ```bash
-bunx @gltf-transform/cli optimize king.glb public/models/king.glb \
-  --compress draco --texture-compress webp --texture-size 1024
+vercel deploy --prod --yes   # 在 web/ 下執行
 ```
 
-## Audio
-
-Ambient and one-shot MP3s are streamed once and decoded into Web Audio buffers. The score is
-**Chinese Guzheng 1** by `u_ej49m6thqx`, used under the Pixabay Content License; provenance and
-the source link are in `public/audio/LICENSE.md`. The tension stem remains a locally generated
-low war-drum layer. UI blips are synthesised with oscillators. Everything
-routes through one master gain for the mute toggle, and playback only starts after the
-first user gesture (browser autoplay policy).
+線上版:https://chinese-chess-two.vercel.app
