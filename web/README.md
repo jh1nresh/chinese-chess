@@ -1,4 +1,4 @@
-# 龍爭象棋 — the app
+# 赤壁象棋 — the app
 
 This folder holds the game itself. For the project overview, features, architecture notes and
 contribution guide, read the [root README](../README.md) and [CONTRIBUTING.md](../CONTRIBUTING.md).

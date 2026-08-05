@@ -6,10 +6,10 @@ import type { Faction, PieceKind } from "../core/types";
  * 楚漢相爭 armies — hand-authored low-poly figures for the Chu-Han contention
  * (項羽 vs 劉邦, ~203 BC), the war the river inscription 楚河漢界 names.
  *
- * 紅方 = 楚軍: 楚人尚赤 — vermilion robes, bronze lamellar, the overlord in a
- * 鶡冠 with twin pheasant plumes carrying a 戟.
- * 黑方 = 漢軍: 漢承秦制尚黑 — ink robes, iron lamellar, 劉邦 in his own 長冠
- * (the "劉氏冠") carrying a 劍.
+ * 紅方 = 漢軍: 劉邦以赤帝子起兵, 漢家尚赤 — vermilion robes, bronze lamellar,
+ * 劉邦 in his own 長冠 (the "劉氏冠") carrying a 劍.
+ * 藍方 = 楚軍 — indigo robes, iron lamellar, the overlord 項羽 in a 鶡冠
+ * with twin pheasant plumes carrying a 戟.
  * Soldiers wear the era's topknot and head-wrap over 札甲 — no anachronistic
  * conical hats — and the 炮 rank is a traction stone-thrower (砲), the actual
  * siege engine of the period.
@@ -32,7 +32,7 @@ interface Colourway {
 }
 
 const COLOURS: Record<Faction, Colourway> = {
-  // 楚 — authored darker than intent; the halls' warm key light and ACES
+  // 漢 — authored darker than intent; the halls' warm key light and ACES
   // tone mapping lift everything roughly one stop.
   w: {
     robe: 0x821712,
@@ -44,7 +44,7 @@ const COLOURS: Record<Faction, Colourway> = {
     tassel: 0xa01f16,
     wood: 0x5a3d24,
   },
-  // 漢 — deep indigo, the blue ink of the classic piece sets, against 楚 red.
+  // 楚 — deep indigo, the blue ink of the classic piece sets, against 漢 red.
   b: {
     robe: 0x14223f,
     robeTrim: 0x6e5c33,
@@ -458,7 +458,7 @@ function buildStoneThrower(c: Colourway): THREE.Group {
 
 const BUILDERS: Record<PieceKind, (c: Colourway, faction: Faction) => THREE.Group> = {
   p: (c) => buildSoldier(c),
-  k: (c, faction) => (faction === "w" ? buildXiangYu(c) : buildLiuBang(c)),
+  k: (c, faction) => (faction === "w" ? buildLiuBang(c) : buildXiangYu(c)),
   q: (c) => buildAdvisor(c),
   b: (c) => buildMinister(c),
   n: (c) => buildHorse(c),

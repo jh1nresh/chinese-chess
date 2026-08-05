@@ -1,4 +1,4 @@
-# 龍爭象棋 — 3D Chinese Chess
+# 赤壁象棋 — 3D Chinese Chess
 
 A cinematic 3D Chinese chess game in the browser. Red and Black armies face each other as
 sculpted, rigged soldiers in a Chinese mountain-temple command court, marching and striking

@@ -8,7 +8,7 @@ interface CrestProps {
   active?: boolean;
 }
 
-/** Faction crest: 楚 for Red, 漢 for Black. */
+/** Faction crest: 漢 for Red, 楚 for Blue — 劉邦尚赤, 項羽執楚. */
 export const Crest = memo(function Crest({ faction, size = 34, active = false }: CrestProps) {
   const field = faction === "w" ? "#e9dfc8" : "#1d1e24";
   const charge = faction === "w" ? "#3c5fa8" : "#a8342a";
@@ -37,7 +37,7 @@ export const Crest = memo(function Crest({ faction, size = 34, active = false }:
         fontSize="20"
         fontWeight="700"
       >
-        {faction === "w" ? "楚" : "漢"}
+        {faction === "w" ? "漢" : "楚"}
       </text>
       <path d="M14 8 h12" stroke={trim} strokeWidth="1.2" opacity="0.7" />
     </svg>

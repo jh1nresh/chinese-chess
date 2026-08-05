@@ -1,4 +1,4 @@
-# 龍爭象棋：MagicBlock 鏈上雙人對戰規格
+# 赤壁象棋：MagicBlock 鏈上雙人對戰規格
 
 - 文件狀態：Draft v0.1
 - 目標網路：Solana Devnet
