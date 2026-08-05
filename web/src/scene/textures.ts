@@ -706,3 +706,28 @@ export function shaftTexture(): THREE.CanvasTexture {
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
+
+/** Warm board wood: long horizontal grain streaks over a pale base the arena
+ * theme tints. Shared by both tile materials so the field reads as one slab. */
+export function woodTexture(): THREE.CanvasTexture {
+  const size = 512;
+  const { canvas, ctx } = createCanvas(size);
+  ctx.fillStyle = "#e7d9b8";
+  ctx.fillRect(0, 0, size, size);
+
+  // Long grain streaks.
+  for (let i = 0; i < 90; i += 1) {
+    const y = Math.random() * size;
+    const length = 120 + Math.random() * 380;
+    const x = Math.random() * size - length / 2;
+    const tone = 165 + Math.random() * 45;
+    ctx.strokeStyle = `rgba(${tone},${tone * 0.85},${tone * 0.6},${0.03 + Math.random() * 0.04})`;
+    ctx.lineWidth = 1 + Math.random() * 2.4;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x + length * 0.3, y + (Math.random() - 0.5) * 8, x + length * 0.7, y + (Math.random() - 0.5) * 8, x + length, y);
+    ctx.stroke();
+  }
+  grain(ctx, size, 1600, 0.03);
+  return toTexture(canvas, 1);
+}

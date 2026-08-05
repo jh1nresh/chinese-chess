@@ -115,18 +115,18 @@ function MainMenuContent({
         </h1>
         <div className="mc-rule mx-auto mt-3 w-64" />
         <p className="mt-3 text-sm italic text-[#c5b28d]">
-          {attract ? "象棋演武進行中" : "華人象棋規則，奇幻中古軍陣"}
+          {attract ? "象棋演武進行中" : "華人象棋規則，楚漢沙場軍陣"}
         </p>
       </div>
 
       <div className="mc-slate mc-goldleaf mc-rise flex w-full min-h-0 max-w-lg flex-col p-5 sm:p-6">
-        <div className="mb-4 flex shrink-0 justify-end"><PrivyLoginButton /></div>
-        {!authenticated ? (
+        {onLogin ? <div className="mb-4 flex shrink-0 justify-end"><PrivyLoginButton /></div> : null}
+        {!authenticated && onLogin ? (
           <p className="mb-4 text-center text-xs leading-relaxed text-[#c5b28d]" role="status">
-            {onLogin ? "請先使用 Privy 登入，登入後才能進入戰場。" : "尚未設定 Privy；單機模式可直接進入，鏈上對戰需要登入。"}
+            請先使用 Privy 登入，登入後才能進入戰場。
           </p>
         ) : null}
-        <div className="mb-5 grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className={`mb-5 grid shrink-0 grid-cols-2 gap-2 ${onLogin ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
           <button
             type="button"
             className="mc-chip flex items-center justify-center gap-1.5 px-1 py-3"
@@ -143,14 +143,16 @@ function MainMenuContent({
           >
             <Users size={14} /> 雙人對戰
           </button>
-          <button
-            type="button"
-            className="mc-chip flex items-center justify-center gap-1.5 px-1 py-3"
-            data-active={tab === "online"}
-            onClick={() => setTab("online")}
-          >
-            <RadioTower size={14} /> 鏈上對戰
-          </button>
+          {onLogin ? (
+            <button
+              type="button"
+              className="mc-chip flex items-center justify-center gap-1.5 px-1 py-3"
+              data-active={tab === "online"}
+              onClick={() => setTab("online")}
+            >
+              <RadioTower size={14} /> 鏈上對戰
+            </button>
+          ) : null}
           <button
             type="button"
             className="mc-chip flex items-center justify-center gap-1.5 px-1 py-3"

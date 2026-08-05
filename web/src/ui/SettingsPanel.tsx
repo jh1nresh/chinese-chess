@@ -76,15 +76,7 @@ export function SettingsPanel({ settings, autoDetected, gpu, fps, onChange, onCl
         <div className="mc-rule my-5" />
 
         <p className="mc-display mb-2 text-[0.6rem] tracking-[0.3em] text-[#a89268]">棋子樣式</p>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            className="mc-chip py-2.5"
-            data-active={settings.pieceStyle === "figures"}
-            onClick={() => onChange({ ...settings, pieceStyle: "figures" })}
-          >
-            西幻軍團
-          </button>
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             className="mc-chip py-2.5"
@@ -105,9 +97,7 @@ export function SettingsPanel({ settings, autoDetected, gpu, fps, onChange, onCl
         <p className="mt-2 text-xs italic text-[#9c8b6c]">
           {settings.pieceStyle === "traditional"
             ? "木刻圓棋、楷體刻字，最傳統的象棋樣貌"
-            : settings.pieceStyle === "chinese"
-              ? "斗笠長槍、戰車火炮的中式軍陣，離線即時生成"
-              : "AI 生成的西幻軍團，吃子有攻擊動畫"}
+            : "楚漢相爭軍陣：項羽對劉邦，戰車投石、帥旗獵獵"}
         </p>
 
         <div className="mc-rule my-5" />

@@ -1261,7 +1261,7 @@ export class PieceFactory {
   private clipListener: ClipListener | null = null;
   private warming: Promise<void> | null = null;
 
-  private style: PieceStyle = "figures";
+  private style: PieceStyle = "chinese";
 
   get isReady(): boolean {
     return this.loaded;
@@ -1575,8 +1575,8 @@ export class PieceFactory {
  * Primitive-built humanoid used only if a generated sculpt fails to download —
  * head, torso, arms and a kind-specific silhouette so the game stays playable.
  */
-/** Which sculpt roster the board fields: western armies, Chinese armies or discs. */
-export type PieceStyle = "figures" | "chinese" | "traditional";
+/** Which sculpt roster the board fields: the 楚漢 armies or traditional discs. */
+export type PieceStyle = "chinese" | "traditional";
 
 const traditionalFaceCache = new Map<string, THREE.CanvasTexture>();
 

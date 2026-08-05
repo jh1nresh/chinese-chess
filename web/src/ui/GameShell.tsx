@@ -35,7 +35,7 @@ interface RenderPrefs {
  * find the toggle again on every reload.
  */
 function loadRenderPrefs(): RenderPrefs {
-  const fallback: RenderPrefs = { safeMode: false, brightness: 1, pieceStyle: "figures" };
+  const fallback: RenderPrefs = { safeMode: false, brightness: 1, pieceStyle: "chinese" };
   if (typeof window === "undefined") return fallback;
   try {
     const forced = new URLSearchParams(window.location.search).has("safe");
@@ -44,8 +44,7 @@ function loadRenderPrefs(): RenderPrefs {
     return {
       safeMode: forced || stored.safeMode === true,
       brightness: typeof stored.brightness === "number" ? Math.min(1.8, Math.max(0.6, stored.brightness)) : 1,
-      pieceStyle:
-        stored.pieceStyle === "traditional" || stored.pieceStyle === "chinese" ? stored.pieceStyle : "figures",
+      pieceStyle: stored.pieceStyle === "traditional" ? "traditional" : "chinese",
     };
   } catch {
     return fallback;

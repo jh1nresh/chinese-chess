@@ -57,6 +57,71 @@ const COLOURS: Record<Faction, Colourway> = {
   },
 };
 
+/** 大纛旗面 — the faction character brushed onto the commander's standard. */
+function bannerTexture(character: string, ground: number, ink: string): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = `#${ground.toString(16).padStart(6, "0")}`;
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 5;
+  ctx.strokeRect(8, 8, 112, 112);
+  ctx.fillStyle = ink;
+  ctx.font = "700 84px KaiTi, STKaiti, DFKai-SB, serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(character, 64, 68);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+/** 大纛 — the tall command standard planted beside the general. */
+function addCommandBanner(group: THREE.Group, c: Colourway, character: string): void {
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.026, 2.05, 8), standard(c.wood, 0.7, 0.05));
+  pole.position.set(-0.42, 1.02, -0.1);
+  group.add(pole);
+  const finial = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), standard(c.robeTrim, 0.35, 0.5));
+  finial.position.set(-0.42, 2.07, -0.1);
+  group.add(finial);
+  const clothMaterial = new THREE.MeshStandardMaterial({
+    map: bannerTexture(character, c.cloth, "#d8c49a"),
+    roughness: 0.45,
+    metalness: 0.1,
+    emissive: new THREE.Color(c.cloth).multiplyScalar(0.35),
+    emissiveIntensity: 0.05,
+    envMapIntensity: 0.6,
+    side: THREE.DoubleSide,
+  });
+  clothMaterial.userData.keepLook = true;
+  const cloth = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.44), clothMaterial);
+  cloth.position.set(-0.19, 1.78, -0.1);
+  group.add(cloth);
+  for (const drop of [0.12, 0.24, 0.36]) {
+    const streamer = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.14, 6), standard(c.tassel, 0.85, 0));
+    streamer.position.set(-0.42 + drop, 1.49, -0.1);
+    streamer.rotation.x = Math.PI;
+    group.add(streamer);
+  }
+}
+
+/** 圓盾 — a round lacquered shield strapped to the left arm. */
+function addShield(group: THREE.Group, c: Colourway, y: number): void {
+  const face = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.035, 16), standard(c.cloth, 0.5, 0.2));
+  face.rotation.z = Math.PI / 2;
+  face.position.set(-0.3, y, 0.05);
+  group.add(face);
+  const boss = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), standard(c.metal, 0.35, 0.7));
+  boss.position.set(-0.32, y, 0.05);
+  group.add(boss);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.016, 6, 18), standard(c.robeTrim, 0.4, 0.4));
+  rim.rotation.y = Math.PI / 2;
+  rim.position.set(-0.3, y, 0.05);
+  group.add(rim);
+}
+
 function standard(color: number, roughness = 0.62, metalness = 0.08): THREE.MeshStandardMaterial {
   // Surface response mirrors applyFactionLook's tinted sculpts: a tighter
   // roughness band and a same-hue emissive floor keep the authored hue from
@@ -163,6 +228,7 @@ function buildSoldier(c: Colourway): THREE.Group {
   const head = addHead(group, c, 1.2);
   addTopknot(group, c, head.position.y);
   addHalberd(group, c, 0.3, 1.5);
+  addShield(group, c, 0.78);
   return group;
 }
 
@@ -198,6 +264,7 @@ function buildXiangYu(c: Colourway): THREE.Group {
   }
 
   addHalberd(group, c, 0.34, 1.8);
+  addCommandBanner(group, c, "楚");
   return group;
 }
 
@@ -234,6 +301,7 @@ function buildLiuBang(c: Colourway): THREE.Group {
   guard.position.set(0.08, 0.94, 0.17);
   group.add(guard);
 
+  addCommandBanner(group, c, "漢");
   return group;
 }
 
