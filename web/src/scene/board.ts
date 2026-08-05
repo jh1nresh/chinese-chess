@@ -252,7 +252,7 @@ export class BoardView {
     this.lightTileMaterial = lightMaterial;
     this.darkTileMaterial = darkMaterial;
 
-    const tileGeometry = this.track(new RoundedBoxGeometry(TILE * 0.97, 0.18, TILE * 0.97, 3, 0.035));
+    const tileGeometry = this.track(new RoundedBoxGeometry(TILE * 0.998, 0.18, TILE * 0.998, 2, 0.012));
 
     for (let rank = 0; rank < RANKS; rank += 1) {
       for (let fileIndex = 0; fileIndex < FILES.length; fileIndex += 1) {

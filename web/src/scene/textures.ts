@@ -720,26 +720,14 @@ export function woodTexture(): THREE.CanvasTexture {
     const y = Math.random() * size;
     const length = 120 + Math.random() * 380;
     const x = Math.random() * size - length / 2;
-    const tone = 150 + Math.random() * 70;
-    ctx.strokeStyle = `rgba(${tone},${tone * 0.82},${tone * 0.55},${0.08 + Math.random() * 0.1})`;
+    const tone = 165 + Math.random() * 45;
+    ctx.strokeStyle = `rgba(${tone},${tone * 0.85},${tone * 0.6},${0.03 + Math.random() * 0.04})`;
     ctx.lineWidth = 1 + Math.random() * 2.4;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.bezierCurveTo(x + length * 0.3, y + (Math.random() - 0.5) * 8, x + length * 0.7, y + (Math.random() - 0.5) * 8, x + length, y);
     ctx.stroke();
   }
-  // A few knots.
-  for (let i = 0; i < 5; i += 1) {
-    const x = Math.random() * size;
-    const y = Math.random() * size;
-    for (let ring = 1; ring <= 4; ring += 1) {
-      ctx.strokeStyle = `rgba(120,90,52,${0.1 - ring * 0.015})`;
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.ellipse(x, y, ring * 5, ring * 3.2, 0.3, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
-  grain(ctx, size, 2600, 0.05);
+  grain(ctx, size, 1600, 0.03);
   return toTexture(canvas, 1);
 }
