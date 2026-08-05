@@ -111,7 +111,7 @@ function MainMenuContent({
       <div className="mc-unfurl mc-menu-hero mb-6 shrink-0 text-center">
         <p className="mc-display text-[0.68rem] tracking-[0.55em] text-[#c8ab74]">楚河 · 漢界</p>
         <h1 className="mc-display mc-title-glow mt-2 text-5xl font-bold text-[#f4e3bd] sm:text-6xl">
-          龍爭象棋
+          赤壁象棋
         </h1>
         <div className="mc-rule mx-auto mt-3 w-64" />
         <p className="mt-3 text-sm italic text-[#c5b28d]">

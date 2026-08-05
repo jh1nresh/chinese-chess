@@ -665,7 +665,7 @@ function LoadingScreen({ progress }: { progress: number }) {
   return (
     <div className="mc-fade absolute inset-0 flex flex-col items-center justify-center gap-5 bg-[#05060a]/85 px-6">
       <p className="mc-display text-[0.62rem] tracking-[0.5em] text-[#a89268]">列陣中</p>
-      <h1 className="mc-display mc-title-glow text-4xl text-[#f4e3bd]">龍爭象棋</h1>
+      <h1 className="mc-display mc-title-glow text-4xl text-[#f4e3bd]">赤壁象棋</h1>
       <div className="h-[3px] w-64 overflow-hidden rounded-full bg-[#2a251c]">
         <div
           className="h-full rounded-full bg-gradient-to-r from-[#8a6522] via-[#f6dfa5] to-[#8a6522] transition-[width] duration-300"
