@@ -706,3 +706,40 @@ export function shaftTexture(): THREE.CanvasTexture {
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
+
+/** Warm board wood: long horizontal grain streaks over a pale base the arena
+ * theme tints. Shared by both tile materials so the field reads as one slab. */
+export function woodTexture(): THREE.CanvasTexture {
+  const size = 512;
+  const { canvas, ctx } = createCanvas(size);
+  ctx.fillStyle = "#e7d9b8";
+  ctx.fillRect(0, 0, size, size);
+
+  // Long grain streaks.
+  for (let i = 0; i < 90; i += 1) {
+    const y = Math.random() * size;
+    const length = 120 + Math.random() * 380;
+    const x = Math.random() * size - length / 2;
+    const tone = 150 + Math.random() * 70;
+    ctx.strokeStyle = `rgba(${tone},${tone * 0.82},${tone * 0.55},${0.08 + Math.random() * 0.1})`;
+    ctx.lineWidth = 1 + Math.random() * 2.4;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x + length * 0.3, y + (Math.random() - 0.5) * 8, x + length * 0.7, y + (Math.random() - 0.5) * 8, x + length, y);
+    ctx.stroke();
+  }
+  // A few knots.
+  for (let i = 0; i < 5; i += 1) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    for (let ring = 1; ring <= 4; ring += 1) {
+      ctx.strokeStyle = `rgba(120,90,52,${0.1 - ring * 0.015})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.ellipse(x, y, ring * 5, ring * 3.2, 0.3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+  grain(ctx, size, 2600, 0.05);
+  return toTexture(canvas, 1);
+}

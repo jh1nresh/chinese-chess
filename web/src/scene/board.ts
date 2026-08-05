@@ -8,7 +8,7 @@ import {
   captureMarkerTexture,
   castleMarkerTexture,
   columnTexture,
-  marbleTexture,
+  woodTexture,
   moveMarkerTexture,
   promoteMarkerTexture,
   landingRingTexture,
@@ -221,8 +221,11 @@ export class BoardView {
   constructor() {
     this.group.name = "board";
 
-    const lightMap = this.track(marbleTexture(false));
-    const darkMap = this.track(marbleTexture(true));
+    // One shared wood slab: xiangqi boards are a single timber face, so both
+    // "checker" materials use the same grain and differ only by a whisper of
+    // tone (kept for square-picking readability).
+    const lightMap = this.track(woodTexture());
+    const darkMap = lightMap;
     const lightMaterial = this.track(
       new THREE.MeshPhysicalMaterial({
         map: lightMap,
@@ -367,24 +370,21 @@ export class BoardView {
     inscription.renderOrder = 2;
     this.group.add(inscription);
 
-    const lineMaterial = this.track(
-      new THREE.LineBasicMaterial({ color: 0x8a5a24, transparent: true, opacity: 0.9 }),
+    // The traditional line diagram — rank/file lines broken at the river,
+    // palace diagonals and the 炮/卒 sighting brackets — one crisp overlay.
+    const gridMaterial = this.track(
+      new THREE.MeshBasicMaterial({
+        map: this.track(xiangqiGridTexture()),
+        transparent: true,
+        depthWrite: false,
+      }),
     );
-    const palacePairs: [SquareId, SquareId][] = [
-      ["d0", "f2"],
-      ["f0", "d2"],
-      ["d7", "f9"],
-      ["f7", "d9"],
-    ];
-    for (const [from, to] of palacePairs) {
-      const geometry = this.track(
-        new THREE.BufferGeometry().setFromPoints([
-          squareToWorld(from, BOARD_TOP + 0.015),
-          squareToWorld(to, BOARD_TOP + 0.015),
-        ]),
-      );
-      this.group.add(new THREE.Line(geometry, lineMaterial));
-    }
+    const grid = new THREE.Mesh(new THREE.PlaneGeometry(TILE * 9, TILE * 10), gridMaterial);
+    this.track(grid.geometry);
+    grid.rotation.x = -Math.PI / 2;
+    grid.position.set(0, BOARD_TOP + 0.005, 0);
+    grid.renderOrder = 1;
+    this.group.add(grid);
   }
 
   private buildHighlights(): void {
@@ -938,6 +938,89 @@ function riverInscriptionTexture(): THREE.CanvasTexture {
   ctx.fillText("河", 256 + spread, 52);
   ctx.fillText("漢", 768 - spread, 52);
   ctx.fillText("界", 768 + spread, 52);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  return texture;
+}
+
+/**
+ * The traditional xiangqi line diagram, drawn once into a canvas that spans
+ * the whole 9×10 field (one cell = 128px, lines pass through cell centres):
+ * a double outer frame, rank lines, file lines broken at the river (edge
+ * files run through), palace diagonals and the corner brackets that sight
+ * the cannon and soldier starting points. Fully symmetric top-to-bottom, so
+ * board orientation cannot render it wrong.
+ */
+function xiangqiGridTexture(): THREE.CanvasTexture {
+  const cell = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = cell * 9;
+  canvas.height = cell * 10;
+  const ctx = canvas.getContext("2d")!;
+  const ink = "rgba(62,40,20,0.85)";
+  const cx = (file: number): number => (file + 0.5) * cell;
+  const cy = (rank: number): number => (rank + 0.5) * cell;
+
+  ctx.strokeStyle = ink;
+  ctx.lineCap = "round";
+
+  // Rank lines.
+  ctx.lineWidth = 6;
+  for (let rank = 0; rank < 10; rank += 1) {
+    ctx.beginPath();
+    ctx.moveTo(cx(0), cy(rank));
+    ctx.lineTo(cx(8), cy(rank));
+    ctx.stroke();
+  }
+  // File lines — the middle files stop at the river banks.
+  for (let file = 0; file < 9; file += 1) {
+    const spans = file === 0 || file === 8 ? [[0, 9]] : [[0, 4], [5, 9]];
+    for (const [from, to] of spans) {
+      ctx.beginPath();
+      ctx.moveTo(cx(file), cy(from));
+      ctx.lineTo(cx(file), cy(to));
+      ctx.stroke();
+    }
+  }
+  // Palace diagonals.
+  for (const [top, bottom] of [
+    [0, 2],
+    [7, 9],
+  ]) {
+    ctx.beginPath();
+    ctx.moveTo(cx(3), cy(top));
+    ctx.lineTo(cx(5), cy(bottom));
+    ctx.moveTo(cx(5), cy(top));
+    ctx.lineTo(cx(3), cy(bottom));
+    ctx.stroke();
+  }
+  // Heavier outer frame just outside the play lines.
+  ctx.lineWidth = 10;
+  const inset = cell * 0.34;
+  ctx.strokeRect(cx(0) - inset, cy(0) - inset, cx(8) - cx(0) + inset * 2, cy(9) - cy(0) + inset * 2);
+
+  // 準星 corner brackets on the cannon and soldier points.
+  ctx.lineWidth = 5;
+  const gap = 14;
+  const arm = 22;
+  const bracket = (file: number, rank: number): void => {
+    for (const sx of [-1, 1]) {
+      if ((file === 0 && sx === -1) || (file === 8 && sx === 1)) continue;
+      for (const sy of [-1, 1]) {
+        const x = cx(file) + sx * gap;
+        const y = cy(rank) + sy * gap;
+        ctx.beginPath();
+        ctx.moveTo(x + sx * arm, y);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, y + sy * arm);
+        ctx.stroke();
+      }
+    }
+  };
+  for (const rank of [2, 7]) for (const file of [1, 7]) bracket(file, rank);
+  for (const rank of [3, 6]) for (const file of [0, 2, 4, 6, 8]) bracket(file, rank);
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
