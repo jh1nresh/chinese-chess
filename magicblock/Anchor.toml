@@ -6,10 +6,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-xiangqi_match = "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2"
+xiangqi_match = "4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW"
 
 [programs.devnet]
-xiangqi_match = "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2"
+xiangqi_match = "4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW"
 
 [provider]
 cluster = "Localnet"

@@ -14,7 +14,7 @@ import type { Faction, PieceKind } from "../core/types";
 
 const SIZE = 256;
 
-const PIECE_CHARACTERS: Record<Faction, Record<PieceKind, string>> = {
+export const PIECE_CHARACTERS: Record<Faction, Record<PieceKind, string>> = {
   w: { k: "帥", q: "仕", b: "相", n: "馬", r: "俥", c: "炮", p: "兵" },
   b: { k: "將", q: "士", b: "象", n: "馬", r: "車", c: "砲", p: "卒" },
 };

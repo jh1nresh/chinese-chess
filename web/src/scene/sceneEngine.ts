@@ -12,7 +12,14 @@ import { BOARD_TOP, BoardView, type HighlightKind, TILE, squareToWorld, worldToS
 import { CastleHall, buildEnvironmentMap } from "./environment";
 import { describeGpu, probeGpu, reflectionProbeWorks, type GpuReport } from "./diagnostics";
 import { EffectsSystem, ShakeSystem } from "./effects";
-import { FACTION_ACCENT, PieceFactory, PieceView, type ClipName, type TemplateKey } from "./pieces";
+import {
+  FACTION_ACCENT,
+  PieceFactory,
+  PieceView,
+  type ClipName,
+  type PieceStyle,
+  type TemplateKey,
+} from "./pieces";
 import { PostFX } from "./postfx";
 import { QUALITY_SETTINGS, type QualityPreset } from "./quality";
 import { SPELL_LOOK, SpellLightPool, SpellOrb } from "./spells";
@@ -3022,6 +3029,20 @@ export class SceneEngine {
    * — no geometry is rebuilt — so the change lands within a single frame even
    * mid-game, and only the reflection probe is regenerated.
    */
+  /** Applies the remembered style before load(), so the first field is right. */
+  primePieceStyle(style: PieceStyle): void {
+    this.factory.primeStyle(style);
+  }
+
+  /** Swaps between the 3D armies and traditional carved discs, then refields the board. */
+  async setPieceStyle(style: PieceStyle): Promise<void> {
+    // Never touch the roster while the initial load is still writing templates.
+    if (!this.factory.isReady || style === this.factory.currentStyle) return;
+    await this.factory.setStyle(style);
+    if (this.disposed) return;
+    this.rebuildPieces();
+  }
+
   setArena(theme: ArenaTheme): void {
     if (theme === this.arena) return;
     this.arena = theme;

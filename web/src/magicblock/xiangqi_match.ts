@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/xiangqi_match.json`.
  */
 export type XiangqiMatch = {
-  "address": "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2",
+  "address": "4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW",
   "metadata": {
     "name": "xiangqiMatch",
     "version": "0.1.0",
@@ -385,38 +385,38 @@ export type XiangqiMatch = {
             "program": {
               "kind": "const",
               "value": [
-                3,
-                92,
-                60,
-                238,
-                198,
+                48,
+                15,
+                219,
+                196,
+                152,
+                142,
+                247,
+                195,
+                8,
+                244,
                 95,
-                36,
-                44,
-                214,
-                155,
-                228,
-                35,
-                184,
-                39,
-                97,
-                172,
-                250,
-                46,
-                165,
-                225,
-                118,
-                188,
-                205,
-                162,
-                12,
-                37,
-                221,
-                128,
-                103,
-                33,
+                86,
+                85,
+                119,
+                17,
+                173,
+                170,
+                7,
+                111,
+                6,
+                61,
+                52,
+                6,
+                229,
+                11,
+                183,
                 75,
-                135
+                189,
+                105,
+                88,
+                190,
+                29
               ]
             }
           }
@@ -522,7 +522,7 @@ export type XiangqiMatch = {
         },
         {
           "name": "ownerProgram",
-          "address": "E7oLP2LUd16wRVDp6hZfC8xxbG7TfMmjtEeaWyYWqt2"
+          "address": "4EcbVv7UbxnTb8tDbRkb6iUmahhUav8ccv1dCSgE6VVW"
         },
         {
           "name": "delegationProgram",

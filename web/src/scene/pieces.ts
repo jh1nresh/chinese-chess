@@ -9,7 +9,15 @@ import {
   type PieceAnimationSet,
 } from "../assets/generated";
 import type { Faction, PieceKind } from "../core/types";
-import { BADGE_LIFT, BADGE_SCALE, TOKEN_SCALE, rankBadgeTexture, tacticalTokenTexture } from "./rankBadges";
+import { buildChineseFigure } from "./chineseFigures";
+import {
+  BADGE_LIFT,
+  BADGE_SCALE,
+  PIECE_CHARACTERS,
+  TOKEN_SCALE,
+  rankBadgeTexture,
+  tacticalTokenTexture,
+} from "./rankBadges";
 import { radialTexture } from "./textures";
 import { Ease, type TweenManager } from "./tween";
 import { attachWeapons, type AttachedArms } from "./weapons";
@@ -378,7 +386,8 @@ export class PieceView {
       mesh.userData.piece = this;
       const source = mesh.material as THREE.MeshStandardMaterial;
       const material = source.clone();
-      applyFactionLook(material, color, ownLivery);
+      // Traditional discs carry their own carved look — no faction tinting.
+      if (!material.userData.keepLook) applyFactionLook(material, color, ownLivery);
       installDissolve(material, this.dissolveUniforms, 0.85);
       mesh.material = material;
       this.materials.push(material);
@@ -549,6 +558,7 @@ export class PieceView {
    * aligned against the pose the player actually sees.
    */
   private equipArms(model: THREE.Object3D, unit: number, baseY: number): void {
+    if (model.userData.noProps) return;
     try {
       this.mixer?.update(0);
       const arms = attachWeapons(model, this.kind, this.color, unit, baseY);
@@ -1251,8 +1261,63 @@ export class PieceFactory {
   private clipListener: ClipListener | null = null;
   private warming: Promise<void> | null = null;
 
+  private style: PieceStyle = "figures";
+
   get isReady(): boolean {
     return this.loaded;
+  }
+
+  get currentStyle(): PieceStyle {
+    return this.style;
+  }
+
+  /** Chooses the roster before the first load — a no-op once templates exist. */
+  primeStyle(style: PieceStyle): void {
+    if (!this.loaded) this.style = style;
+  }
+
+  /** Swaps the whole roster; traditional discs build instantly and offline. */
+  async setStyle(style: PieceStyle): Promise<void> {
+    if (style === this.style) return;
+    this.style = style;
+    this.templates.clear();
+    this.clipSources.clear();
+    this.loaded = false;
+    await this.load();
+  }
+
+  private loadChinese(): void {
+    const kinds = Object.keys(PIECE_MODEL_URLS.w) as PieceKind[];
+    for (const faction of ["w", "b"] as Faction[]) {
+      for (const kind of kinds) {
+        this.templates.set(
+          `${faction}${kind}`,
+          this.normalize(buildChineseFigure(kind, faction), kind, {}, true),
+        );
+      }
+    }
+  }
+
+  private loadTraditional(): void {
+    const kinds = Object.keys(PIECE_MODEL_URLS.w) as PieceKind[];
+    for (const faction of ["w", "b"] as Faction[]) {
+      for (const kind of kinds) {
+        const scene = buildTraditionalPiece(kind, faction);
+        const box = measureModel(scene);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        this.templates.set(`${faction}${kind}`, {
+          scene,
+          scale: 1,
+          offset: new THREE.Vector3(0, 0, 0),
+          skinned: false,
+          clips: {},
+          unit: size.y,
+          baseY: 0,
+          ownLivery: true,
+        });
+      }
+    }
   }
 
   /** Registers the sink for clips that land after the board is already up. */
@@ -1261,6 +1326,13 @@ export class PieceFactory {
   }
 
   async load(onProgress?: (loaded: number, total: number) => void): Promise<void> {
+    if (this.style === "traditional" || this.style === "chinese") {
+      if (this.style === "traditional") this.loadTraditional();
+      else this.loadChinese();
+      onProgress?.(1, 1);
+      this.loaded = true;
+      return;
+    }
     const kinds = Object.keys(PIECE_MODEL_URLS.w) as PieceKind[];
     const factions: Faction[] = ["w", "b"];
     const jobs: { faction: Faction; kind: PieceKind }[] = [];
@@ -1503,6 +1575,121 @@ export class PieceFactory {
  * Primitive-built humanoid used only if a generated sculpt fails to download —
  * head, torso, arms and a kind-specific silhouette so the game stays playable.
  */
+/** Which sculpt roster the board fields: western armies, Chinese armies or discs. */
+export type PieceStyle = "figures" | "chinese" | "traditional";
+
+const traditionalFaceCache = new Map<string, THREE.CanvasTexture>();
+
+/** Carved disc face: wood grain, double ring and the engraved character. */
+function traditionalFaceTexture(kind: PieceKind, faction: Faction): THREE.CanvasTexture {
+  const key = `${faction}${kind}`;
+  const cached = traditionalFaceCache.get(key);
+  if (cached) return cached;
+
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+
+  const wood = ctx.createRadialGradient(size / 2, size / 2, size * 0.1, size / 2, size / 2, size * 0.52);
+  wood.addColorStop(0, "#ecd9ab");
+  wood.addColorStop(0.75, "#dfc38a");
+  wood.addColorStop(1, "#c8a86d");
+  ctx.fillStyle = wood;
+  ctx.fillRect(0, 0, size, size);
+
+  // A few concentric grain arcs so the top does not read as flat plastic.
+  ctx.strokeStyle = "rgba(146,110,60,0.16)";
+  ctx.lineWidth = 2;
+  for (let ring = 0; ring < 5; ring += 1) {
+    ctx.beginPath();
+    ctx.arc(size * 0.42, size * 0.46, size * (0.14 + ring * 0.11), 0.4 + ring, 2.6 + ring);
+    ctx.stroke();
+  }
+
+  const ink = faction === "w" ? "#a5281b" : "#26241f";
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 7;
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size * 0.44, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size * 0.385, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = ink;
+  ctx.font = `700 ${size * 0.5}px KaiTi, STKaiti, DFKai-SB, serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  // Carved look: a dark bite under the stroke, then the ink itself.
+  ctx.shadowColor = "rgba(60,34,10,0.55)";
+  ctx.shadowBlur = 3;
+  ctx.shadowOffsetY = 2;
+  ctx.fillText(PIECE_CHARACTERS[faction][kind], size / 2, size / 2 + size * 0.02);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  traditionalFaceCache.set(key, texture);
+  return texture;
+}
+
+/** Frees the cached disc faces (engine teardown only). */
+export function disposeTraditionalTextures(): void {
+  for (const texture of traditionalFaceCache.values()) texture.dispose();
+  traditionalFaceCache.clear();
+}
+
+/**
+ * Traditional carved xiangqi piece: a wooden disc with the rank character on
+ * top. Royals stand a touch wider and taller so the hierarchy still reads.
+ */
+export function buildTraditionalPiece(kind: PieceKind, faction: Faction): THREE.Object3D {
+  const group = new THREE.Group();
+  // Weapons and strike props are meaningless on a disc.
+  group.userData.noProps = true;
+  // With the enemy-facing turn applied by setFacing, this half turn puts each
+  // side's engraving upright for its own player — like a real board.
+  group.rotation.y = Math.PI;
+
+  const royal = kind === "k" || kind === "q";
+  const radius = royal ? 0.42 : 0.38;
+  const height = royal ? 0.26 : 0.22;
+
+  const sideColor = faction === "w" ? 0xcfa96a : 0xb08d55;
+  const side = new THREE.MeshStandardMaterial({ color: sideColor, roughness: 0.55, metalness: 0.05 });
+  const face = new THREE.MeshStandardMaterial({
+    map: traditionalFaceTexture(kind, faction),
+    roughness: 0.5,
+    metalness: 0.04,
+  });
+  // The carved look must survive the faction re-tint applied to shared sculpts.
+  side.userData.keepLook = true;
+  face.userData.keepLook = true;
+
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius * 1.05, height, 48), side);
+  body.position.y = height / 2;
+  group.add(body);
+
+  const top = new THREE.Mesh(new THREE.CircleGeometry(radius * 0.99, 48), face);
+  top.rotation.x = -Math.PI / 2;
+  top.position.y = height + 0.002;
+  group.add(top);
+
+  // Rounded lip so torchlight catches the rim.
+  const lip = new THREE.Mesh(
+    new THREE.TorusGeometry(radius * 0.985, height * 0.09, 10, 48),
+    side,
+  );
+  lip.rotation.x = Math.PI / 2;
+  lip.position.y = height;
+  group.add(lip);
+
+  return group;
+}
+
 export function buildProceduralFigure(kind: PieceKind): THREE.Object3D {
   const group = new THREE.Group();
   const stone = new THREE.MeshStandardMaterial({ color: 0xe8e0cf, roughness: 0.5, metalness: 0.1 });
